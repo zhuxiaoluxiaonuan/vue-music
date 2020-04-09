@@ -1,6 +1,6 @@
 <template>
   <div class="list-view">
-    <loading v-if="!singers.length"></loading>
+    <loading v-if="singers.length === 0"></loading>
     <scroll
       v-else
       :data="singers"
@@ -119,13 +119,19 @@ export default {
     },
     toDetail(item) {
       this.$emit('select', item)
+    },
+    refresh () { // 供外部父组件调用
+      this.$refs.listView && this.$refs.listView.refresh()
     }
   },
   computed: {
     shortcutList () {
-      return this.singers.map(singer => {
-        return singer.title.substring(0, 1)
-      })
+      if (this.singers.length > 0) {
+        return this.singers.map(singer => {
+          return singer.title.substring(0, 1)
+        })
+      }
+      return []
     },
     fixedTitle() {
       if (this.scrollY > 0) {
@@ -184,9 +190,9 @@ export default {
     padding-left 14px
     height 30px
     line-height 30px
-    background-color $color-background-l
+    background-color #f9f9f9
     font-size $font-size-small
-    color $color-text
+    color $color-text-ll
   .list-group
     padding-bottom 10px
     ul
@@ -212,7 +218,7 @@ export default {
           .size
             display flex
             align-items center
-            color $color-text-l
+            color $color-text-d
             font-size $font-size-small
             .music-size
               margin-right 10px
@@ -223,14 +229,12 @@ export default {
     transform translateY(-50%)
     width 20px
     padding 20px 0
-    border-radius 10px
     text-align center
-    background $color-background-l
     font-family Helvetica
     .item
       padding 3px
       line-height 1
-      color $color-text-l
+      color $color-text-d
       font-size $font-size-small
       &.current
         color $color-theme

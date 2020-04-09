@@ -24,14 +24,15 @@ export default {
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
         addClass(child, 'swiper-item')
-        width += child.clientWidth + 10
+        width += child.clientWidth + 12
       }
-      this.$refs.swiperGroup.style.width = (width - 10) + 'px'
+      this.$refs.swiperGroup.style.width = (width - 12) + 'px'
     },
     _initSwiper() {
       this.swiper = new BScroll(this.$refs.swiper, {
         scrollX: true,
         momentum: false,
+        click: true,
         snap: {
           loop: false,
           threshold: 0.3,
@@ -58,7 +59,7 @@ export default {
     .swiper-item
       position: relative
       display: inline-block
-      margin-right 10px
+      margin-right 12px
       width 100px
       vertical-align middle
       &:last-child
@@ -66,11 +67,13 @@ export default {
       .picture img
           width 100%
           border-radius 5px
+          box-shadow rgba(16,36,94,0.1) 0px 2px 6px 0px
       .des
+        margin-top 10px
         height 40px
         line-height: 20px
-        font-size $font-size-small
-        color: $color-text-l
+        font-size $font-size-small-s
+        color: $color-text-ll
         white-space normal
         text-overflow -o-ellipsis-lastline
         overflow hidden
@@ -85,7 +88,7 @@ export default {
         display flex
         align-items center
         color: $color-text-l
-        font-size $font-size-small
+        font-size $font-size-small-s
         .icon
           display inline-block
           margin-right 2px

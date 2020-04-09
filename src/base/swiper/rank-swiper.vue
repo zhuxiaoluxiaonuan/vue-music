@@ -48,7 +48,7 @@ export default {
         stopPropagation: true,
         eventPassthrough: 'vertical'
       })
-      this.swiper.on('beforeScrollStart', () => {
+      this.swiper.on('scrollEnd', () => {
         const pageIndex = this.swiper.getCurrentPage().pageX
         this.$emit('setRankType', pageIndex)
       })
@@ -64,6 +64,7 @@ export default {
     overflow: hidden
     .swiper-group
       white-space: nowrap
+      touch-action: none
       ul
         position: relative
         display: inline-block
@@ -76,7 +77,7 @@ export default {
           flex-direction column
           justify-content space-around
           height 100px
-          background-color $color-text-m
+          background-color rgba(0, 0, 0, 0.03)
           border-radius 5px
           .name
             margin-bottom 5px
@@ -106,5 +107,5 @@ export default {
               i
                 font-size $font-size-large-x
                 font-weight 800
-                color $color-text
+                color $color-background-ll
 </style>

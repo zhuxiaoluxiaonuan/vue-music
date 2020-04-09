@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="folding-panel" v-show="toggle">
-      <div class="item" v-for="(tab, index) in tabSub" :key="tab.id" @click="changeActive(index)">{{tab.name}}</div>
+      <div class="item" v-for="(tab, index) in tabSub" :key="tab.id" @click="changeActive(index + 5)">{{tab.name}}</div>
     </div>
   </div>
 </template>
@@ -40,7 +40,7 @@ export default {
       this._initScroll()
       this.$emit('questData', {
         index: 0,
-        id: this.tabs[0].id
+        param: this.tabs[0].param
       })
     }, 20)
   },
@@ -65,9 +65,6 @@ export default {
       })
     },
     changeActive(index) {
-      if (this.toggle) {
-        index += 5
-      }
       if (this.preIndex === index) return
       this.tabNum = index
       this.preIndex = index
@@ -87,7 +84,7 @@ export default {
       this.scroll && this.scroll.scrollToElement(this.$refs.scrollGroup.children[newIndex], 300, true)
       this.$emit('questData', {
         index: newIndex,
-        id: this.tabs[newIndex].id
+        param: this.tabs[newIndex].param
       }) // 根据ID请求数据
     },
     toggle(newVal) {
@@ -115,13 +112,13 @@ export default {
             height 24px
             line-height 24px
             font-size $font-size-small
-            color $color-text-ll
+            color $color-text-l
             &:last-child
               margin-right 0
             &.active
               padding 0 10px
               border-radius 3px
-              background-color $color-text-m
+              background-color rgba(0, 0, 0, 0.05)
               color $color-text
       .icon
         margin 0 10px
@@ -143,5 +140,5 @@ export default {
       .item
         margin 10px 20px 10px 0
         font-size $font-size-small
-        color $color-text-ll
+        color $color-text-l
 </style>

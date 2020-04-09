@@ -5,14 +5,11 @@
                       @after-enter="afterEnter"
                       @leave="leave"
                       @after-leave="afterLeave">
-      <div class="normal-player" v-show="fullScreen" :style="bgStyle">
-      <div class="background">
-        <img width="100%" height="100%" :src="currentSong.image">
-      </div>
-      <div class="msk"></div>
+      <div class="normal-player" v-show="fullScreen">
+      <div class="background" :style="{backgroundImage: `url(${coverUrlBlur})`}"></div>
       <div class="header">
         <span class="back" @click="back">
-          <i class="extend-fanhui"></i>
+          <i class="extend-xia"></i>
         </span>
         <span class="label" :class="{'active':currentShow==='cover'}">歌曲</span>
         <span class="separator">|</span>
@@ -35,7 +32,7 @@
                 <div class="songN-singerN">{{currentContent}}</div>
               </div>
               <div class="right">
-                <i class="extend-extend-test"></i>
+                <i class="extend-icon-test"></i>
               </div>
             </div>
           </div>
@@ -71,9 +68,9 @@
             <div class="name">{{currentSong.name}}</div>
             <div class="singer">{{currentSong.singer}}</div>
           </div>
-          <scroll class="lyricList" ref="lyricList">
-            <div class="lyric-wrapper">
-              <div v-if="currentLyric">
+          <div class="lyricList">
+            <scroll  v-if="currentLyric" ref="lyricList">
+              <div class="lyric-wrapper">
                 <p ref="lyricLine"
                    class="text"
                    :class="{'current': currentLineNum === index}"
@@ -82,9 +79,19 @@
                   {{line.txt}}
                 </p>
               </div>
+            </scroll>
+            <div v-else class="noLyric">
+              此歌曲为没有填词的纯音乐，请您欣赏
             </div>
-          </scroll>
-          <div class="bottom"></div>
+          </div>
+          <div class="bottom">
+            <div class="txt">
+              <span>{{currentSong.name}} - {{currentSong.singer}}</span>
+            </div>
+            <div class="icon">
+              <i :class="playIcon" @click="togglePlaying"></i>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -115,15 +122,15 @@
 <script>
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
-import analyze from 'rgbaster'
 import {prefixStyle} from 'common/js/dom'
 import {getSongUrl} from 'api/axios'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
-import {shuffle} from 'common/js/util'
+import {shuffle, imgToBlob} from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import {color} from 'common/js/background-color'
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
@@ -131,12 +138,12 @@ export default {
   name: 'player',
   data() {
     return {
-      color: '#3abdb1',
       url: '',
       songReady: false,
       currentTime: 0,
       duration: 0,
       playTime: 0,
+      coverUrlBlur: color.black,
       radius: 24, // 圆形进度条的半径
       currentLyric: null,
       currentLineNum: 0,
@@ -156,11 +163,10 @@ export default {
       })
       toast.show()
     },
-    async getBgColor() {
-      if (this.currentSong.image) {
-        const result = await analyze(this.currentSong.image, { scale: 0.6 })
-        this.color = result[0].color
-      }
+    setBgImage() {
+      imgToBlob(this.currentSong.image + '?imageView=1&thumbnail=400x0', blur => {
+        this.coverUrlBlur = blur
+      }, 100, -0.2)
     },
     back() {
       this.setFullScreen(false)
@@ -324,6 +330,10 @@ export default {
         if (this.playing) {
           this.currentLyric.play() // 调用封装好的play方法【这里的play方法就是回调函数handleLyric】，播放歌词
         }
+      }).catch(() => {
+        this.currentLyric = null
+        this.playingLyric = ''
+        this.currentLineNum = 0
       })
     },
     handleLyric({lineNum, txt}) {
@@ -448,9 +458,6 @@ export default {
       'mode',
       'sequenceList'
     ]),
-    bgStyle() {
-      return `background: ${this.color}`
-    },
     playIcon() {
       return this.playing ? 'extend-zanting1' : 'extend-bofang1'
     },
@@ -487,8 +494,8 @@ export default {
       if (newSong.id === oldSong.id) {
         return
       }
+      this.setBgImage()
       this._getData()
-      this.getBgColor()
       this.getLyric()
       if (this.currentLyric) { // 结束上一首歌曲的歌词滚动定时器
         this.currentLyric.stop()
@@ -536,20 +543,15 @@ export default {
     top 0
     bottom 0
     z-index 150
-    .background, .msk
+    .background
       position absolute
       left 0
       top 0
       width 100%
       height 100%
-    .background
-      z-index -2
-      opacity 0.6
-      filter blur(40px)
-      transform scale(1.2)
-    .msk
+      transition background-image .4s
+      background no-repeat 50%/cover
       z-index -1
-      background-color $color-background-d
     .header
       margin 0 14px 20px 14px
       height 50px
@@ -559,12 +561,12 @@ export default {
         float left
         i
           font-size $font-size-large-x
-          color $color-text
+          color $color-background
       .label, .separator
         vertical-align top
-        color $color-text-l
+        color $color-background-l
         &.active
-          color $color-text
+          color $color-background
       .label
         margin 0 5px
         font-size $font-size-small
@@ -591,19 +593,21 @@ export default {
             width 100%
             img
               width 100%
-              height 100%
+              max-height 315px
               border-radius 15px
           .desc
             position relative
             margin-top 40px
             display flex
             justify-content space-between
+            overflow hidden
             .left
-              flex 1
+              flex: 1
+              min-width: 0 /*解决“flex布局左边固定，右边自适应，右边内容超出会影响布局“问题*/
               .song-name, .singer-name, .songN-singerN
                 margin-bottom 15px
               .song-name
-                width 280px
+                width 100%
                 height 30px
                 line-height 30px
                 font-size $font-size-large-x
@@ -611,16 +615,19 @@ export default {
                 white-space nowrap
                 overflow hidden
                 text-overflow ellipsis
+                color $color-background
               .singer-name, .songN-singerN
-                color $color-text-l
+                color $color-background-ll
                 font-size $font-size-small
               .songN-singerN
                 margin-top 20px
             .right
+              flex 0 0 32px
               position relative
               top -4px
               i
                 font-size $font-size-large-xx
+                color $color-background
         .bottom
           position absolute
           bottom 0
@@ -629,6 +636,7 @@ export default {
             margin-bottom 20px
             display flex
             align-items center
+            color $color-background
             .time
               flex 1
               font-size $font-size-small
@@ -642,8 +650,9 @@ export default {
             display flex
             align-items center
             .icon
+              color $color-background
               &.disable
-                color $color-text-l
+                color $color-background-m
             .i-fir
               flex 2
             .i-sec
@@ -660,7 +669,7 @@ export default {
               position relative
               right -8px
             .i-light
-              color $color-text-l
+              color $color-background-ll
             .icon-mode
               font-size 20px
             .extend-shangyishou-
@@ -677,7 +686,7 @@ export default {
         margin 0 20px 0 50px
         width: 100%
         height 100%
-        color $color-text-l
+        color $color-background-ll
         .title
           .name
             margin-bottom 10px
@@ -687,20 +696,27 @@ export default {
         .lyricList
           position absolute
           top 55px
-          bottom 60px
+          bottom 50px
           width: 100%
           height auto
           .lyric-wrapper
             overflow: hidden
             .text
               line-height 36px
-              color: $color-text-l
+              color: $color-background-l
               font-size: $font-size-medium
               &.current
                 transform-origin left
                 transition transform .3s
                 transform scale(1.2)
-                color: $color-text
+                color: $color-background
+          .noLyric
+            display flex
+            justify-content center
+            align-items center
+            width 100%
+            height 100%
+            font-size $font-size-small
         .bottom
           position absolute
           bottom 0
@@ -708,6 +724,17 @@ export default {
           height 40px
           display flex
           align-items center
+          justify-content space-between
+          color $color-background
+          .txt
+            margin-right 20px
+            letter-spacing 1px
+            white-space nowrap
+            overflow hidden
+            text-overflow ellipsis
+            font-size $font-size-medium-x
+          i
+            font-size 28px
     &.normal-enter-active, &.normal-leave-active
       transition: all 0.4s
     .header, .bottom
@@ -727,7 +754,8 @@ export default {
     align-content center
     padding 0 14px
     height 45px
-    background $color-background
+    color $color-background
+    background $color-text
     &.mini-enter-active, &.mini-leave-active
       transition: all 0.4s
     &.mini-enter, &.mini-leave-to
@@ -739,7 +767,7 @@ export default {
       width 40px
       height 40px
       border-radius 50%
-      background $color-background
+      background $color-text
       animation rotate 10s linear infinite
       &.paused
         animation-play-state paused
@@ -758,7 +786,7 @@ export default {
         text-overflow ellipsis
       .singer
         font-size $font-size-small-s
-        color $color-text-l
+        color $color-background-l
     .play
       position absolute
       top 10px
@@ -769,6 +797,7 @@ export default {
         left 0
         font-size 24px
         z-index -1
+        color $color-background-l
     .list
       position absolute
       right 8px

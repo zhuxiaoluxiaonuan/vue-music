@@ -89,7 +89,7 @@ export default {
         margin-right 10px
         width 12px
         height 2px
-        background $color-text-l
+        background $color-text-s
         &.active
           background $color-theme
     .list-swiper
@@ -120,11 +120,8 @@ export default {
               width: 80%
               height: 76%
               background-color: $color-hover
-              -webkit-transition: 0.15s ease
               transition: 0.15s ease
               opacity: 0
-              -webkit-border-radius: 5px
-              -moz-border-radius: 5px
               border-radius: 5px
             .icon
               flex: 0 0 60px
@@ -133,11 +130,10 @@ export default {
               img
                 position: relative
                 width 65px
-                -webkit-border-radius 5px
-                -moz-border-radius 5px
                 border-radius 5px
                 vertical-align: middle
                 z-index 2
+                box-shadow rgba(0,0,0,0.04) 5px 5px 0px 0px
             .text
               display: flex
               flex-direction: column

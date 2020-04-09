@@ -45,8 +45,8 @@ export default {
       transform-origin: center
       &.progress-background
         transform: scale(0.9)
-        stroke: $color-text
+        stroke: #a8a8a8
       &.progress-bar
         transform: scale(0.9) rotate(-90deg)
-        stroke: $color-theme
+        stroke: $color-background
 </style>

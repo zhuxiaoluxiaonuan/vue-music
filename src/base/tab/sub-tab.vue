@@ -9,7 +9,7 @@
         <!-- 默认插槽 -->
         {{item.label}}
         <!-- name为icon的插槽 -->
-        <span class="size">{{item.data.size}}</span>
+        <span class="size" v-if="item.data.size">{{item.data.size}}</span>
       </cube-tab>
     </cube-tab-bar>
   </div>
@@ -80,14 +80,13 @@ export default {
 .tab {
   display: flex;
   flex-direction: column;
-  height: 100%;
   >>> .cube-tab-bar {
     margin 0 36px
   }
   >>> .cube-tab {
     height 30px
     line-height 30px
-    color $color-text-l
+    color $color-text-d
     &.cube-tab_active{
       color $color-text
     }

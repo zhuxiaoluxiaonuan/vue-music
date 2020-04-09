@@ -8,7 +8,7 @@
         <!-- 默认插槽 -->
         {{item.label}}
         <!-- name为icon的插槽 -->
-        <span class="size">{{item.data.size}}</span>
+        <span class="size" v-show="item.data.size">{{item.data.size}}</span>
       </cube-tab>
     </cube-tab-bar>
     <div class="slide-wrapper">
@@ -125,7 +125,7 @@ export default {
   >>> .cube-tab {
     height 30px
     line-height 30px
-    color $color-text-l
+    color $color-text-d
     &.cube-tab_active{
       color $color-text
     }

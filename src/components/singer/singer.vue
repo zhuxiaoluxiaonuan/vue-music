@@ -1,8 +1,8 @@
 <template>
-  <div class="singer">
+  <div class="singer" ref="singer">
     <tab-scroll :tabs="tabs" @questData="fetch"></tab-scroll>
     <div class="singer-list">
-      <list-view :singers="singers" @select="selectSinger"></list-view>
+      <list-view :singers="singers" @select="selectSinger" ref="list"></list-view>
     </div>
     <router-view></router-view>
   </div>
@@ -11,9 +11,10 @@
 <script>
 import TabScroll from 'base/scroll/tab-scroll'
 import ListView from 'base/list-view/list-view'
-import {getSingerList, getSingerCategory} from 'api/axios'
+import {getSingerCategory} from 'api/axios'
 import Singer from 'common/js/singer'
 import {mapMutations} from 'vuex' // 用vuex提供的语法糖，更便捷的提交 mutation
+import {playListMixin} from 'common/js/mixin'
 
 const pinyin = require('pinyin')
 const HOT_NAME = '热门'
@@ -24,71 +25,67 @@ export default {
     return {
       tabs: [
         {
-          id: 0,
+          param: {area: -1, type: [1, 2, 3]},
           name: '全部'
         },
         {
-          id: 5001,
-          name: '入驻'
-        },
-        {
-          id: 1001,
+          param: {area: 7, type: [1]},
           name: '华语男'
         },
         {
-          id: 1002,
+          param: {area: 7, type: [2]},
           name: '华语女'
         },
         {
-          id: 1003,
+          param: {area: 7, type: [3]},
           name: '华语组合/乐队'
         },
         {
-          id: 2001,
+          param: {area: 96, type: [1]},
           name: '欧美男'
         },
         {
-          id: 2002,
+          param: {area: 96, type: [2]},
           name: '欧美女'
         },
         {
-          id: 2003,
+          param: {area: 96, type: [3]},
           name: '欧美组合/乐队'
         },
         {
-          id: 6001,
+          param: {area: 8, type: [1]},
           name: '日本男'
         },
         {
-          id: 6002,
+          param: {area: 8, type: [2]},
           name: '日本女'
         },
         {
-          id: 6003,
+          param: {area: 8, type: [3]},
           name: '日本组合/乐队'
         },
         {
-          id: 7001,
+          param: {area: 16, type: [1]},
           name: '韩国男'
         },
         {
-          id: 7002,
+          param: {area: 16, type: [2]},
           name: '韩国女'
         },
         {
-          id: 7003,
+          param: {area: 16, type: [3]},
           name: '韩国组合/乐队'
         },
         {
-          id: 4001,
+          param: {area: 0, type: [1]},
           name: '其他男'
         },
         {
-          id: 4002,
+          param: {area: 0, type: [2]},
           name: '其他女'
         },
         {
-          id: 4003,
+          param: {area: 0, type: [3]},
           name: '其他组合/乐队'
         }
       ],
@@ -96,28 +93,60 @@ export default {
       tabSinger: []
     }
   },
+  mixins: [playListMixin],
   methods: {
-    fetch({index, id}) {
+    handlePlayList(playList) {
+      const bottom = playList.length > 0 ? '45px' : ''
+      this.$refs.singer.style.bottom = bottom
+      this.$refs.list.refresh()
+    },
+    fetch({index, param}) {
       if (this.tabSinger[index]) { // 当前项的数据已经被请求过
         this.singers = this.tabSinger[index]
+        return
+      }
+      let type = param.type
+      let area = param.area
+      if (area === -1) { // 当前请求的是全部数据
+        let tempArr = []
+        getSingerCategory({
+          type: type[0],
+          area: area
+        }).then(res => {
+          if (res.code === 200) {
+            tempArr.push(res.artists.slice(0, 20)) // 取前20条数据
+            return getSingerCategory({
+              type: type[1],
+              area: area
+            })
+          }
+        }).then(res => {
+          if (res.code === 200) {
+            tempArr.push(res.artists.slice(0, 20))
+            return getSingerCategory({
+              type: type[2],
+              area: area
+            })
+          }
+        }).then(res => {
+          if (res.code === 200) {
+            tempArr.push(res.artists.slice(0, 20))
+            this.singers = this.getSingers(tempArr[0].concat(tempArr[1]).concat(tempArr[2]))
+            this.tabSinger[index] = this.singers
+            tempArr = null
+          }
+        })
       } else {
-        if (id === 0) {
-          getSingerList().then(res => {
-            if (res.code === 200) {
-              this.singers = this.getSingers(res.artists)
-              this.tabSinger[index] = this.singers
-            }
-          })
-        } else {
-          getSingerCategory({
-            cat: id
-          }).then(res => {
-            if (res.code === 200) {
-              this.singers = this.getSingers(res.artists)
-              this.tabSinger[index] = this.singers
-            }
-          })
-        }
+        getSingerCategory({
+          type: type[0],
+          area: area,
+          limit: 50
+        }).then(res => {
+          if (res.code === 200) {
+            this.singers = this.getSingers(res.artists)
+            this.tabSinger[index] = this.singers
+          }
+        })
       }
     },
     getSingers(data) {

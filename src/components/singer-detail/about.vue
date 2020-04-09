@@ -159,11 +159,14 @@ export default {
       font-size $font-size-large
       margin-right 8px
   .txt
-    text-indent 2em // 设置首行缩进2个文字
     line-height 25px
     font-size $font-size-small
     color $color-text-ll
     white-space pre-wrap // 用于处理文字中的\n
+    display -webkit-box
+    -webkit-box-orient vertical
+    -webkit-line-clamp 4
+    overflow hidden
   .recent-hot-topics
     .hot-songs li
       margin 10px 0
@@ -197,10 +200,6 @@ export default {
             -webkit-border-radius: 1px
             -moz-border-radius: 1px
             border-radius: 1px
-          .label
-            color $color-label
-            border 1px solid $color-label
-          .super-quality
             color $color-theme
             border 1px solid $color-theme
           .singer

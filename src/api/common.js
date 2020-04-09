@@ -12,3 +12,9 @@ export function get(url) {
     }).catch(rej => {})
   }
 }
+export function all(promiseArr) {
+  return axios.all(promiseArr).then(
+    axios.spread(function(...resList) {
+      return resList
+    }))
+}

@@ -21,14 +21,14 @@ export default {
   @import "~common/stylus/variable"
   .loading
     position: absolute
-    top: 50%
+    top 50%
     left 50%
     transform translate(-50%, -50%)
     text-align: center
     .img
       width 48px
       height 24px
-      background url("./loading.gif") center
+      background url("./loading_black.gif") center
     .desc
       line-height: 20px
       font-size: $font-size-small

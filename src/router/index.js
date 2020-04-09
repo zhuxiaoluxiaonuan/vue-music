@@ -33,6 +33,12 @@ const SingerDetail = (resolve) => {
   })
 }
 
+const PlayList = (resolve) => {
+  import('components/play-list/play-list').then((module) => {
+    resolve(module)
+  })
+}
+
 export default new Router({
   routes: [
     {
@@ -45,7 +51,13 @@ export default new Router({
     },
     {
       path: '/recommend',
-      component: Recommend
+      component: Recommend,
+      children: [
+        {
+          path: ':id',
+          component: PlayList
+        }
+      ]
     },
     {
       path: '/search',
@@ -60,6 +72,14 @@ export default new Router({
           component: SingerDetail
         }
       ]
-    }
+    },
+    {
+      path: '/recommend/:id',
+      name: 'similar', // 上面匹配这里的name
+      meta: {
+        requireAuth: true
+      },
+      component: PlayList
+    } // 解决跳转到同一路由，组件不刷新的问题
   ]
 })

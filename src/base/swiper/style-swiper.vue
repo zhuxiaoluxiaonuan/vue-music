@@ -24,9 +24,9 @@ export default {
       for (let i = 0; i < children.length; i++) {
         const child = children[i]
         addClass(child, 'swiper-item')
-        width += child.clientWidth + 10
+        width += child.clientWidth + 12
       }
-      this.$refs.swiperGroup.style.width = (width - 10) + 'px'
+      this.$refs.swiperGroup.style.width = (width - 12) + 'px'
     },
     _initSwiper() {
       this.swiper = new BScroll(this.$refs.styleSwiper, {
@@ -58,10 +58,10 @@ export default {
       .swiper-item
         position: relative
         display: inline-block
-        margin-right 10px
+        margin-right 12px
         width 100px
         vertical-align middle
-        background-color $color-text-m
+        background-color rgba(0, 0, 0, 0.03)
         border-radius 5px
         &:last-child
           margin-right 0
@@ -72,9 +72,9 @@ export default {
         .des
           margin 0 5px
           height 40px
-          line-height: 20px
+          line-height: 18px
           font-size $font-size-small-s
-          color: $color-text-l
+          color: $color-text-ll
           white-space normal
           text-overflow -o-ellipsis-lastline
           overflow hidden
@@ -89,7 +89,7 @@ export default {
           display flex
           align-items center
           color: $color-text-l
-          font-size $font-size-small
+          font-size $font-size-small-s
           .icon
             display inline-block
             margin-right 2px

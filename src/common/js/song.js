@@ -17,7 +17,7 @@ export default class Song {
       getSongLyric({
         id: this.id
       }).then((res) => {
-        if (res.code === 200) {
+        if (res.code === 200 && res.lrc) {
           this.lyric = res.lrc.lyric
           resolve(this.lyric)
         } else {

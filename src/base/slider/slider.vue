@@ -134,9 +134,9 @@ export default {
       width: 6px
       height: 6px
       border-radius: 50%
-      background: $color-text-l
+      background: $color-background-d
       &.active
         width: 12px
         border-radius: 5px
-        background: $color-theme
+        background: $color-background
 </style>

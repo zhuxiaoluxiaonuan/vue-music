@@ -1,8 +1,8 @@
 <template>
-  <div class="recommend">
-    <scroll :data="personalized" ref="scroll">
-      <loading  v-if="!banners.length"></loading>
-      <div v-else class="recommend-content">
+  <div class="recommend" ref="recommend">
+    <loading  v-if="!banners.length"></loading>
+    <scroll v-else :data="personalized" ref="scroll">
+      <div class="recommend-content">
         <div v-if="banners.length">
           <slider>
             <div v-for="item in banners" :key="item.pic">
@@ -13,14 +13,14 @@
         <div v-if="personalized.length" class="personalized"  >
           <header class="title">推荐歌单</header>
           <swiper>
-            <div v-for="item in personalized" :key="item.id">
+            <div v-for="item in personalized" :key="item.id" @click="selectItem(item)">
               <div class="picture">
-                <img v-lazy="item.picUrl" :data-id="item.id">
+                <img v-lazy="item.picUrl">
               </div>
               <p class="des">{{item.name}}</p>
               <div class="playCount">
                 <i class="icon icon-play"></i>
-                <span>{{item.playCount | setPlayCount}}</span>
+                <span>{{item.playCount | handleNum}}</span>
               </div>
             </div>
           </swiper>
@@ -56,7 +56,7 @@
               <p class="des">{{item.name}}</p>
               <div class="playCount">
                 <i class="icon icon-play"></i>
-                <span>{{item.playCount | setPlayCount}}</span>
+                <span>{{item.playCount | handleNum}}</span>
               </div>
             </div>
           </style-swiper>
@@ -85,6 +85,7 @@
         </div>
       </div>
     </scroll>
+    <router-view :key="$route.path + $route.query.t"></router-view>
   </div>
 </template>
 
@@ -96,6 +97,8 @@ import Swiper from 'base/swiper/swiper'
 import StyleSwiper from 'base/swiper/style-swiper'
 import ListSwiper from 'base/swiper/list-swiper'
 import RankSwiper from 'base/swiper/rank-swiper'
+import {playListMixin} from 'common/js/mixin'
+import {mapMutations} from 'vuex'
 import {
   getRecommendBanner,
   getRecommendPersonalized,
@@ -114,6 +117,7 @@ export default {
       count: Math.round(Math.random() * 10) % 3,
       rankType: 0, // 记录当前的排行榜类型，取值范围[0, 1, 2]
       tempNum: 0, // 记录当前更新过几个列表, 取值范围[0, 1, 2]
+      preRankType: -1,
       direction: 'right'
     }
   },
@@ -124,7 +128,14 @@ export default {
     this._getRecommendSongSheet()
     this._getRecommendSongRank(true)
   },
+  mixins: [playListMixin],
   methods: {
+    handlePlayList(playList) {
+      if (!this.$refs.scroll) return
+      const bottom = playList.length > 0 ? '45px' : ''
+      this.$refs.recommend.style.bottom = bottom
+      this.$refs.scroll.refresh()
+    },
     _getBannerData() {
       getRecommendBanner().then(data => {
         this.banners = data.banners
@@ -150,7 +161,7 @@ export default {
     },
     _getRecommendSongRank(isFirst) {
       getRecommendSongRank({
-        idx: isFirst ? this.rankType : this.rankType + 1
+        idx: this.rankType
       }).then(data => {
         const result = data.playlist.tracks.splice(0, 3)
         if (isFirst) {
@@ -162,11 +173,14 @@ export default {
       })
     },
     setRankType(val) {
-      if (this.direction === 'right' && val !== 2) this.rankType = val + 1
-      if (this.direction === 'left' && val !== 0) this.rankType = val - 1
-      this.direction = val === 2 ? 'left' : (val === 0 ? 'right' : 'right')
-      if (this.tempNum === 2) return
-      this.tempNum += 1
+      if (this.preRankType === val) return
+      this.preRankType = val
+      this.rankType = val
+      // if (this.direction === 'right' && val !== 2) this.rankType = val + 1
+      // if (this.direction === 'left' && val !== 0) this.rankType = val - 1
+      // this.direction = val === 2 ? 'left' : (val === 0 ? 'right' : 'right')
+      // if (this.tempNum === 2) return
+      // this.tempNum += 1
       this._getRecommendSongRank()
     },
     loadImage() {
@@ -174,20 +188,16 @@ export default {
         this.checkloaded = true
         this.$refs.scroll.refresh()
       }
-    }
+    },
+    selectItem(item) {
+      this.$router.push(`/recommend/${item.id}`)
+      this.setDisc(item) // 将选中的歌单保存到vuex中
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   },
   filters: {
-    setPlayCount(count) {
-      let tempCount = count
-      if (count / 100000000 >= 1) {
-        tempCount = Number(parseFloat(count / 100000000).toFixed(2).slice(0, -1))
-        tempCount += '亿'
-      } else if (count / 10000 >= 1) {
-        tempCount = Number(parseFloat(count / 10000).toFixed(2).slice(0, -1))
-        tempCount += '万'
-      }
-      return tempCount
-    },
     getSinger(artists) {
       let singer = []
       artists.forEach(item => {

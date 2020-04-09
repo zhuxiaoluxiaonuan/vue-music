@@ -4,7 +4,7 @@
     <ul v-else>
       <li v-for="item in albums" :key="item.id">
         <div class="img">
-          <img :src="item.picUrl" alt="">
+          <img v-lazy="item.picUrl" alt="">
           <div class="msk"></div>
         </div>
         <div class="desc">
@@ -80,15 +80,14 @@ export default {
       img
         width 100%
         height 100%
-        border 1px solid $color-text-l
       .msk
         position absolute
         top 0
         left 0
         width 75px
         height 60px
-        background url('coverall.png') no-repeat
-        background-position -258px -1130px
+        background url('./album-img/digital-album.svg') no-repeat
+        background-position 60px 0
     .desc
       flex 1
       margin 0 35px

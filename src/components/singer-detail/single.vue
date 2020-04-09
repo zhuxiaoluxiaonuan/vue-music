@@ -13,7 +13,7 @@
           <div class="song-name">{{song.name}}</div>
           <div class="desc">
             <div class="label" v-show="song.fee !== 0">独家</div>
-            <div class="super-quality" v-show="!song.privilege.dl || song.privilege.pl !== song.privilege.dl">SQ</div>
+            <div class="super-quality" v-show="song.privilege && (!song.privilege.dl || song.privilege.pl !== song.privilege.dl)">SQ</div>
             <span class="singer">{{song.singer}}</span>-
             <span class="album">{{song.album}}</span>
           </div>
@@ -28,6 +28,7 @@ import {getSingerDetail} from 'api/axios'
 import {createSong} from 'common/js/song'
 import Loading from 'base/loading/loading'
 import {mapMutations, mapActions} from 'vuex'
+
 export default {
   name: 'song-list',
   props: {
@@ -45,14 +46,20 @@ export default {
   },
   methods: {
     fetch() {
-      return getSingerDetail({
-        id: this.singer.id
-      }).then(res => {
-        if (res.code === 200) {
-          this.hotSongs = this._normalizeSongs(res.hotSongs)
-          this.setHotSongs(this.hotSongs.slice(0, 3))
-        }
-      })
+      if (!this.data.songList) { // 如果data中没有传递歌曲列表，则需要请求数据
+        return getSingerDetail({
+          id: this.singer.id
+        }).then(res => {
+          if (res.code === 200) {
+            this.hotSongs = this._normalizeSongs(res.hotSongs)
+            this.setHotSongs(this.hotSongs.slice(0, 3))
+          }
+        })
+      } else {
+        this.hotSongs = this._normalizeSongs(this.data.songList)
+        this.setHotSongs(this.hotSongs.slice(0, 3))
+        return Promise.resolve()
+      }
     },
     _normalizeSongs(hotSongs) {
       let ret = []
@@ -92,8 +99,8 @@ export default {
 @import '~common/stylus/variable.styl'
 .song-list
   position relative
-  padding 10px 14px 50px 14px
-  background-color $color-background-l
+  padding 10px 14px
+  background-color $color-background
   overflow hidden
   .play-all
     margin-top 20px
@@ -139,20 +146,23 @@ export default {
         color $color-text-l
         .label, .super-quality
           margin-right 5px
-          padding 1px
-          font-size $font-size-small-s
-          -webkit-border-radius: 1px
-          -moz-border-radius: 1px
-          border-radius: 1px
-        .label
-          color $color-label
-          border 1px solid $color-label
-        .super-quality
+          height 14px
+          line-height 14px
+          text-align center
           color $color-theme
+          font-size $font-size-small-s
+          border-radius 1px
           border 1px solid $color-theme
+        .label
+          flex 0 0 24px
+        .super-quality
+          flex 0 0 18px
         .singer
           margin-left 5px
           margin-right 4px
+          white-space nowrap
+          overflow hidden
+          text-overflow ellipsis
         .album
           margin-left 4px
 </style>
