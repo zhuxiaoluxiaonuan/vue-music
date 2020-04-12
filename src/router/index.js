@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 Vue.use(Router)
-
+const routerPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error => error)
+}
 // 按需引入
 const Recommend = (resolve) => {
   import('components/recommend/recommend').then((module) => {
@@ -39,6 +42,12 @@ const PlayList = (resolve) => {
   })
 }
 
+const TopList = (resolve) => {
+  import('components/top-list/top-list').then((module) => {
+    resolve(module)
+  })
+}
+
 export default new Router({
   routes: [
     {
@@ -47,7 +56,13 @@ export default new Router({
     },
     {
       path: '/rank',
-      component: Rank
+      component: Rank,
+      children: [
+        {
+          path: ':id',
+          component: TopList
+        }
+      ]
     },
     {
       path: '/recommend',
@@ -72,14 +87,6 @@ export default new Router({
           component: SingerDetail
         }
       ]
-    },
-    {
-      path: '/recommend/:id',
-      name: 'similar', // 上面匹配这里的name
-      meta: {
-        requireAuth: true
-      },
-      component: PlayList
-    } // 解决跳转到同一路由，组件不刷新的问题
+    }
   ]
 })

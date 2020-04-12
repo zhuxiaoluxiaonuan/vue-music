@@ -10,7 +10,9 @@
             :is-scroll-top="isScrollTop"
             :rank-num="rankNum"></slot>
     <div class="bg-layer" ref="layer"></div>
-    <sub-tab :tabs="minTabs" class="sub-tab" ref="subTab"></sub-tab>
+    <div v-if="minTabs.length !== 0">
+      <sub-tab :tabs="minTabs" class="sub-tab" ref="subTab"></sub-tab>
+    </div>
     <scroll
       class="song-list-warpper"
       :probe-type="probeType"
@@ -77,6 +79,7 @@ export default {
   mounted() {
     this.getSlotChildren() // 获得插槽中的元素
     this._setScrollTop()
+    this.$emit('getHeight', this.height)
   },
   methods: {
     handlePlayList(playList) {
@@ -144,7 +147,9 @@ export default {
         // 顶部标题背景设置
         this.$refs.header.style.backgroundColor = '#000000'
         // 设置顶部tab栏固定，并设置初始index值
-        this.$refs.subTab.$el.style.zIndex = 10
+        if (this.minTabs.length !== 0) {
+          this.$refs.subTab.$el.style.zIndex = 10
+        }
         this.personContainer.style.opacity = 0
       } else {
         this.isScrollTop = false
@@ -153,7 +158,9 @@ export default {
         let gradientValue = (-newY / (-this.maxHeight - newY)) * 2
         this.$refs.title.style.opacity = gradientValue
         this.$refs.header.style.backgroundColor = `rgba(0, 0, 0, ${gradientValue})`
-        this.$refs.subTab.$el.style.zIndex = -1
+        if (this.minTabs.length !== 0) {
+          this.$refs.subTab.$el.style.zIndex = -1
+        }
         this.personContainer.style.opacity = 1 - gradientValue
       }
       this.bgImage.style.zIndex = zIndex
@@ -173,6 +180,9 @@ export default {
         }
       }
       return num
+    },
+    height() {
+      return this.$refs.list && this.$refs.list.$refs.wrapper.clientHeight
     }
   },
   components: {

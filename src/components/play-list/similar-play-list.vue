@@ -47,8 +47,7 @@ export default {
       isShow: false,
       tags: this.data.tags,
       playlist: [],
-      order: 'new',
-      flag: true
+      order: 'new'
     }
   },
   methods: {
@@ -81,15 +80,17 @@ export default {
       this.order = val
     },
     selectItem(item) {
-      this.$router.push({
-        path: `/recommend/${item.id}`,
-        query: {
-          t: Date.now()
-        },
-        name: this.flag ? 'similar' : ''
-      })
-      this.flag = !this.flag
-      this.setDisc(item) // 将选中的歌单保存到vuex中
+      if (this.preId === item.id) return
+      this.preId = item.id
+      if (this.$root.prePlayListComp) {
+        this.$root.prePlayListComp.hide()
+      }
+      this.playListCopyComp = this.$createPlayListCopy()
+      this.playListCopyComp.show()
+      this.$root.prePlayListComp = {...this.playListCopyComp}
+      setTimeout(() => {
+        this.setDisc(item) // 将选中的歌单保存到vuex中
+      }, 200)
     },
     ...mapMutations({
       setDisc: 'SET_DISC'

@@ -23,10 +23,24 @@ Vue.filter('handleNum', function(count) {
   }
   return tempCount
 })
+Vue.filter('getSinger', function(artists) {
+  let singer = []
+  artists.forEach(item => {
+    singer.push(item.name)
+  })
+  return singer.join('/')
+})
+Vue.filter('formatDate', function(date) {
+  let time = new Date(Number(date))
+  return `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`
+})
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  data: {
+    prePlayListComp: null
+  },
   router,
   store,
   render: h => h(App)

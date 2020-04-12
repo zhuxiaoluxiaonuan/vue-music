@@ -1,5 +1,5 @@
 <template>
-  <div class="song-list">
+  <div class="song-list" ref="songList">
     <loading v-if="!hotSongs.length"></loading>
     <div v-else>
       <div class="play-all" @click="playAll">
@@ -8,7 +8,7 @@
         <span class="num">{{hotSongs.length}}</span>
       </div>
       <div class="list" v-for="(song, index) in hotSongs" :key="song.id" @click="selectItem(song, index)">
-        <div class="serial-num">{{index + 1}}</div>
+        <div :class="getRankCls(index)">{{getRankTxt(index)}}</div>
         <div class="container">
           <div class="song-name">{{song.name}}</div>
           <div class="desc">
@@ -35,6 +35,14 @@ export default {
     data: {
       type: Object,
       default: null
+    },
+    singleHeight: {
+      type: Number,
+      default: 0
+    },
+    rank: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -81,6 +89,22 @@ export default {
         list: this.hotSongs
       })
     },
+    getRankCls(index) {
+      if (this.rank) {
+        if (index <= 2) {
+          return `bg bg-${index + 1}`
+        }
+        return 'serial-num'
+      }
+      return 'serial-num'
+    },
+    getRankTxt(index) {
+      if (this.rank && index > 2) {
+        return index + 1
+      } else if (!this.rank) {
+        return index + 1
+      }
+    },
     ...mapMutations({
       'setHotSongs': 'SET_HOTSONGS'
     }),
@@ -88,6 +112,11 @@ export default {
       'selectPlay',
       'randomPlay'
     ])
+  },
+  watch: {
+    singleHeight(newVal) {
+      this.$refs.songList.style.minHeight = newVal + 'px'
+    }
   },
   components: {
     Loading
@@ -118,6 +147,20 @@ export default {
   .list
     position relative
     margin 25px 0
+    .bg
+      position absolute
+      left 0
+      top 50%
+      margin-top -8px
+      width 16px
+      height 16px
+      background-size 16px 16px
+      &.bg-1
+        background-image url("./album-img/first.png")
+      &.bg-2
+        background-image url("./album-img/second.png")
+      &.bg-3
+        background-image url("./album-img/third.png")
     .serial-num
       position absolute
       left 0

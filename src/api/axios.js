@@ -1,5 +1,5 @@
 import {get} from './common'
-const baseURL = 'http://192.168.0.107:3000'
+const baseURL = 'http://192.168.0.108:3000'
 const extendURL = 'http://120.79.162.149:3000'
 const getRecommendBanner = get(baseURL + '/banner?type=1')
 const getRecommendPersonalized = get(baseURL + '/personalized?limit=9')
@@ -16,6 +16,7 @@ const getSongUrl = get(extendURL + '/music/url')
 const getSongLyric = get(baseURL + '/lyric')
 const getPlayListDetail = get(baseURL + '/playlist/detail')
 const getSimilarPlayList = get(baseURL + '/top/playlist?limit=6')
+const getTopList = get(baseURL + '/toplist/detail')
 
 export {
   getRecommendBanner,
@@ -32,5 +33,6 @@ export {
   getSongUrl,
   getSongLyric,
   getPlayListDetail,
-  getSimilarPlayList
+  getSimilarPlayList,
+  getTopList
 }

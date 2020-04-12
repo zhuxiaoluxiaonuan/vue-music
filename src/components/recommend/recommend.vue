@@ -71,7 +71,7 @@
                   <span class="num">{{index + 1}}</span>
                   <span class="songName">{{song.name}}</span>
                   <span>&nbsp;-</span>
-                  <span class="singer">{{song.ar[0].name}}</span>
+                  <span class="singer">{{song.ar | getSinger}}</span>
                 </div>
                 <div class="pic">
                   <img v-lazy="rank[0].al.picUrl" data-id="rank[0].al.id">
@@ -85,7 +85,7 @@
         </div>
       </div>
     </scroll>
-    <router-view :key="$route.path + $route.query.t"></router-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -176,11 +176,6 @@ export default {
       if (this.preRankType === val) return
       this.preRankType = val
       this.rankType = val
-      // if (this.direction === 'right' && val !== 2) this.rankType = val + 1
-      // if (this.direction === 'left' && val !== 0) this.rankType = val - 1
-      // this.direction = val === 2 ? 'left' : (val === 0 ? 'right' : 'right')
-      // if (this.tempNum === 2) return
-      // this.tempNum += 1
       this._getRecommendSongRank()
     },
     loadImage() {
@@ -196,15 +191,6 @@ export default {
     ...mapMutations({
       setDisc: 'SET_DISC'
     })
-  },
-  filters: {
-    getSinger(artists) {
-      let singer = []
-      artists.forEach(item => {
-        singer.push(item.name)
-      })
-      return singer.join('/')
-    }
   },
   computed: {
     updateNewSongs() {

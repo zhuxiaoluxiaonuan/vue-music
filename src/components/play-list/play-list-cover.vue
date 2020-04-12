@@ -98,6 +98,7 @@ export default {
   bottom 0
   background no-repeat 50%/cover
   opacity 1
+  z-index 100
   .close
     position absolute
     top 20px
