@@ -8,12 +8,16 @@ import {
   Style,
   // basic
   TabBar,
+  TabPanels,
   Slide,
   Button,
-  Toast
+  Toast,
+  Checkbox
 } from 'cube-ui'
 
 Vue.use(TabBar)
+Vue.use(TabPanels)
 Vue.use(Slide)
 Vue.use(Button)
 Vue.use(Toast)
+Vue.use(Checkbox)

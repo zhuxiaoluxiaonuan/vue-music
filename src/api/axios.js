@@ -1,5 +1,5 @@
 import {get} from './common'
-const baseURL = 'http://192.168.0.108:3000'
+const baseURL = 'http://192.168.0.103:3000'
 const extendURL = 'http://120.79.162.149:3000'
 const getRecommendBanner = get(baseURL + '/banner?type=1')
 const getRecommendPersonalized = get(baseURL + '/personalized?limit=9')
@@ -17,6 +17,14 @@ const getSongLyric = get(baseURL + '/lyric')
 const getPlayListDetail = get(baseURL + '/playlist/detail')
 const getSimilarPlayList = get(baseURL + '/top/playlist?limit=6')
 const getTopList = get(baseURL + '/toplist/detail')
+const getCheckPhone = get(baseURL + '/cellphone/existence/check')
+const loginCellPhone = get(baseURL + '/login/cellphone')
+const sentCaptcha = get(baseURL + '/captcha/sent')
+const verifyCaptcha = get(baseURL + '/captcha/verify')
+const getDefaultSearch = get(baseURL + '/search/default')
+const getHotSearch = get(baseURL + '/search/hot/detail')
+const getSearchSuggest = get(baseURL + '/search/suggest')
+const getSearchResult = get(baseURL + '/search')
 
 export {
   getRecommendBanner,
@@ -34,5 +42,13 @@ export {
   getSongLyric,
   getPlayListDetail,
   getSimilarPlayList,
-  getTopList
+  getTopList,
+  getCheckPhone,
+  loginCellPhone,
+  sentCaptcha,
+  verifyCaptcha,
+  getDefaultSearch,
+  getHotSearch,
+  getSearchSuggest,
+  getSearchResult
 }

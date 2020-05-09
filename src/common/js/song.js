@@ -30,10 +30,10 @@ export default class Song {
 export function createSong(musicData) {
   return new Song({
     id: musicData.id,
-    singer: getSinger(musicData.ar),
+    singer: getSinger(musicData.ar || musicData.artists),
     name: musicData.name,
-    album: musicData.al.name,
-    image: musicData.al.picUrl,
+    album: musicData.al ? musicData.al.name : musicData.album.name,
+    image: musicData.al && musicData.al.picUrl,
     fee: musicData.fee,
     privilege: musicData.privilege
   })

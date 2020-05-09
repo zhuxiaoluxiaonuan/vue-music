@@ -35,6 +35,9 @@ const mutations = {
   },
   [types.SET_TOP_LIST] (state, topList) {
     state.topList = topList
+  },
+  [types.SET_USER] (state, user) {
+    state.user = user
   }
 }
 export default mutations

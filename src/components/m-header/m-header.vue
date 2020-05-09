@@ -1,7 +1,7 @@
 <template>
   <div class="m-header">
-    <div class="icon"></div>
-    <h1 class="text">Deer Music</h1>
+    <div class="icon" @click="goToLogin"></div>
+    <h1 class="text">Cloud Music</h1>
     <router-link tag="div" class="mine" to="/user">
       <i class="icon-mine"></i>
     </router-link>
@@ -9,8 +9,18 @@
 </template>
 
 <script>
+import {mapMutations} from 'vuex'
 export default {
-  name: 'm-header'
+  name: 'm-header',
+  methods: {
+    goToLogin() {
+      // 显示登录页面
+      this.setUser({isShow: true})
+    },
+    ...mapMutations({
+      'setUser': 'SET_USER'
+    })
+  }
 }
 </script>
 
@@ -30,11 +40,11 @@ export default {
       vertical-align: top
     .icon
       margin-top: 10px
-      margin-right: 15px
-      width: 30px
+      margin-right: 10px
+      width: 32px
       height: 32px
       bg-image('logo')
-      background-size: 30px 32px
+      background-size: 32px 32px
     .text
       height: 50px
       line-height: 50px
