@@ -3,7 +3,7 @@
     <loading v-if="!songs.length"></loading>
     <scroll v-else>
       <ul>
-        <li v-for="song in songs" :key="song.id">
+        <li v-for="song in songs" :key="song.id" @click="selectItem(song)">
           <div class="container">
             <div class="song-name">{{song.name}}</div>
             <div class="desc">
@@ -22,7 +22,7 @@
 <script>
 import Loading from 'base/loading/loading'
 import Scroll from 'base/scroll/scroll'
-import {getSearchResult} from 'api/axios'
+import {getSearchResult, getSongDetail} from 'api/axios'
 import {createSong} from 'common/js/song'
 const SIZE = 20
 
@@ -57,6 +57,15 @@ export default {
         }
       })
       return ret
+    },
+    selectItem(item) {
+      getSongDetail({
+        ids: item.id
+      }).then(res => {
+        if (res.code === 200) {
+          this.$emit('selectItem', {type: 'single', item: createSong(res.songs[0])})
+        }
+      })
     }
   },
   components: {

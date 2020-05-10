@@ -3,8 +3,10 @@
     <search-box
       :defaultSearch="defaultSearch"
       ref="searchBox"
+      @del="del"
       @input="input"></search-box>
-    <scroll class="search-home" v-show="step===1">
+    <!--这里使用v-if，而不使用v-show，是为了防止切换页面之后，scroll无法滚动-->
+    <scroll class="search-home" v-if="step===1" ref="scroll">
       <div class="scroll-content">
         <div class="history">
           <div class="title">历史记录</div>
@@ -42,10 +44,11 @@
       </cube-tab-bar>
       <cube-tab-panels v-model="selectedLabel">
         <cube-tab-panel v-for="item in categoryList" :label="item.label" :key="item.label">
-          <component :is="item.component" ref="component"></component>
+          <component :is="item.component" ref="component" @selectItem="selectItem"></component>
         </cube-tab-panel>
       </cube-tab-panels>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -58,6 +61,7 @@ import Single from 'components/search/search-result/single'
 import PlayList from 'components/search/search-result/play-list'
 import Singer from 'components/search/search-result/singer'
 import Album from 'components/search/search-result/album'
+import {mapMutations, mapActions} from 'vuex'
 
 export default {
   name: 'search',
@@ -66,7 +70,7 @@ export default {
       defaultSearch: {},
       hotSearchList: [],
       searchSuggests: [],
-      selectedLabel: '单曲', // 这里设置的值不能是
+      selectedLabel: '单曲', // 这里设置的值不能是默认值，否则不会出现下划线
       step: 1,
       categoryList: [
         {
@@ -105,6 +109,9 @@ export default {
         return
       }
       this._getSearchSuggest()
+    },
+    del() {
+      this.step = 1
     },
     _getDefaultSearch() {
       getDefaultSearch().then(res => {
@@ -150,7 +157,31 @@ export default {
       // 调用子组件的fetch方法
       let component = this.$refs.component[index]
       component.fetch && component.fetch(this.keywords)
-    }
+    },
+    selectItem({type, item}) {
+      if (type === 'playlist') {
+        this.$router.push({
+          path: '/search/playlist'
+        })
+        this.setDisc(item) // 将选中的歌单保存到vuex中
+      }
+      if (type === 'singer') {
+        this.$router.push({
+          path: '/search/singer'
+        })
+        // 将选中的歌手保存到vuex中
+        this.setSinger(item)
+      }
+      if (type === 'single') {
+        // 调用vuex中的action
+        this.insertSong(item)
+      }
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC',
+      setSinger: 'SET_SINGER'
+    }),
+    ...mapActions(['insertSong'])
   },
   components: {
     SearchBox,

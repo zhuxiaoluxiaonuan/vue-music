@@ -48,12 +48,6 @@ const TopList = (resolve) => {
   })
 }
 
-const SearchHome = (resolve) => {
-  import('components/search/search-home').then((module) => {
-    resolve(module)
-  })
-}
-
 export default new Router({
   routes: [
     {
@@ -85,8 +79,12 @@ export default new Router({
       component: Search,
       children: [
         {
-          path: '',
-          component: SearchHome
+          path: 'singer',
+          component: SingerDetail
+        },
+        {
+          path: 'playlist',
+          component: PlayList
         }
       ]
     },

@@ -3,7 +3,7 @@
     <loading v-if="!artists.length"></loading>
     <scroll v-else>
       <ul>
-        <li class="list-group-item" v-for="item in artists" :key="item.id">
+        <li class="list-group-item" v-for="item in artists" :key="item.id" @click="selectItem(item)">
           <img v-lazy="item.picUrl" alt="">
           <div class="desc">
             <div class="name">
@@ -11,7 +11,7 @@
               <span v-show="item.alias.length">({{item.alias[0]}})</span>
             </div>
             <div class="size">
-              <div class="music-size">歌曲：{{item.musicSize}}</div>
+              <div class="music-size" v-show="item.musicSize">歌曲：{{item.musicSize}}</div>
               <div class="album-size">专辑：{{item.albumSize}}</div>
             </div>
           </div>
@@ -25,6 +25,7 @@
 import Loading from 'base/loading/loading'
 import Scroll from 'base/scroll/scroll'
 import {getSearchResult} from 'api/axios'
+import Singer from 'common/js/singer'
 const SIZE = 20
 
 export default {
@@ -45,10 +46,28 @@ export default {
         offset: this.page - 1
       }).then(res => {
         if (res.code === 200) {
-          this.artists = res.result.artists
+          this.artists = this.handleSinger(res.result.artists)
           this.artistCount = res.result.artistCount
         }
       })
+    },
+    handleSinger(artists) {
+      let res = []
+      artists.forEach(item => {
+        res.push(new Singer({
+          id: item.id,
+          name: item.name,
+          picUrl: item.img1v1Url,
+          alias: item.alias,
+          musicSize: item.musicSize,
+          albumSize: item.albumSize,
+          topicPerson: item.topicPerson
+        }))
+      })
+      return res
+    },
+    selectItem(item) {
+      this.$emit('selectItem', {type: 'singer', item})
     }
   },
   components: {

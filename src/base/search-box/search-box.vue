@@ -40,6 +40,7 @@ export default {
     clear() {
       this.query = ''
       this.$refs.box.focus()
+      this.$emit('del')
     },
     setQuery(query) {
       this.query = query

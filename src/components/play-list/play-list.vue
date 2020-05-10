@@ -100,7 +100,7 @@ export default {
     _getData() {
       getPlayListDetail({
         id: this.disc.id,
-        s: 4
+        s: 3
       }).then(res => {
         if (res.code === 200) {
           this.isShow = true
@@ -135,7 +135,7 @@ export default {
       this.minHeight = minHeight
     },
     back() {
-      this.$router.push('/recommend')
+      this.$router.back(-1)
     }
   },
   computed: {
@@ -239,7 +239,7 @@ export default {
             background-color $color-text-l
             border-radius 0 0 5px 5px
             .left
-              flex 0 0 50%
+              flex 0 0 45%
               height 14px
               display flex
               align-content center

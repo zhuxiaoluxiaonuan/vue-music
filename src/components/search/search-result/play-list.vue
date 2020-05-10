@@ -3,7 +3,7 @@
     <loading v-if="!playlists.length"></loading>
     <scroll v-else>
       <ul>
-        <li v-for="item in playlists" :key="item.id">
+        <li v-for="item in playlists" :key="item.id" @click="selectItem(item)">
           <div class="img">
             <img v-lazy="item.coverImgUrl" alt="">
           </div>
@@ -49,6 +49,9 @@ export default {
           this.playlistCount = res.result.playlistCount
         }
       })
+    },
+    selectItem(item) {
+      this.$emit('selectItem', {type: 'playlist', item})
     }
   },
   components: {
