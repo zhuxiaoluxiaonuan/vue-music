@@ -6,13 +6,13 @@
            autofocus="autofocus"
            v-model="query"
            ref="box"
-           @input="input"
            :placeholder="text">
     <i class="icon-dismiss" v-show="query" @click="clear"></i>
   </div>
 </template>
 
 <script>
+import {debounce} from 'common/js/util'
 export default {
   name: 'search-box',
   props: {
@@ -32,22 +32,27 @@ export default {
     }
   },
   created() {
-    // this.$watch('query', (newVal) => {
-    //   this.$emit('query', newVal)
-    // })
+    // 这里为什么不直接定义watch对象，而使用this.$watch监测呢？
+    // 应为使用this.$watch的方式，可以很方便的将回调函数做函数节流处理
+    this.$watch('query', debounce((newVal) => {
+      this.$emit('query', newVal)
+    }, 200))
   },
   methods: {
     clear() {
       this.query = ''
-      this.$refs.box.focus()
+      this.focus()
       this.$emit('del')
     },
     setQuery(query) {
       this.query = query
+      this.blur()
+    },
+    blur() {
       this.$refs.box.blur()
     },
-    input() {
-      this.$emit('input', this.query)
+    focus() {
+      this.$refs.box.focus()
     }
   },
   watch: {

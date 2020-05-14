@@ -1,7 +1,7 @@
 <template>
   <div class="single-list">
     <loading v-if="!songs.length"></loading>
-    <scroll v-else>
+    <scroll v-else :data="songs">
       <ul>
         <li v-for="song in songs" :key="song.id" @click="selectItem(song)">
           <div class="container">

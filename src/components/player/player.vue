@@ -57,7 +57,7 @@
               <div class="icon i-right i-sec" :class="disableCls">
                 <i class="extend extend-xiayishou-copy" @click="next"></i>
               </div>
-              <div class="icon i-left i-fir i-last i-light">
+              <div class="icon i-left i-fir i-last i-light" @click="showPlayListView">
                 <i class="extend extend-bofangliebiao1"></i>
               </div>
             </div>
@@ -115,6 +115,7 @@
       </div>
     </div>
     </transition>
+    <playlist-view ref="playlistView"></playlist-view>
     <audio :src="url" ref="audio" autoplay @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
@@ -127,15 +128,18 @@ import {getSongUrl} from 'api/axios'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
-import {shuffle, imgToBlob} from 'common/js/util'
+import {imgToBlob} from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import PlaylistView from 'components/playlist-view/playlist-view'
 import {color} from 'common/js/background-color'
+import {playerMixin} from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
 export default {
   name: 'player',
+  mixins: [playerMixin],
   data() {
     return {
       url: '',
@@ -156,13 +160,6 @@ export default {
     this.touch = {}
   },
   methods: {
-    showToastType() {
-      const toast = this.$createToast({
-        txt: this.modeTxt,
-        type: 'correct'
-      })
-      toast.show()
-    },
     setBgImage() {
       imgToBlob(this.currentSong.image + '?imageView=1&thumbnail=400x0', blur => {
         this.coverUrlBlur = blur
@@ -306,24 +303,6 @@ export default {
         this.currentLyric.seek(currentTime * 1000) // 将歌词定位到当前时间
       }
     },
-    changeMode() {
-      const mode = (this.mode + 1) % 3
-      this.setPlayMode(mode)
-      this.showToastType()
-      let list = this.sequenceList
-      if (mode === playMode.random) {
-        list = shuffle(list)
-      }
-      // 在打乱顺序的列表中找到与当前播放的音乐对应的index，并将它赋值到当前的index属性中
-      this.resetCurrentIndex(list)
-      this.setPlayList(list)
-    },
-    resetCurrentIndex(arr) {
-      let index = arr.findIndex(item => {
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
     getLyric() {
       this.currentSong.getLyric().then(res => {
         this.currentLyric = new Lyric(res, this.handleLyric)
@@ -408,6 +387,9 @@ export default {
       this.$refs.leftPage.style[transitionDuration] = `${time}ms`
       this.touch.initiated = false
     },
+    showPlayListView() {
+      this.$refs.playlistView.show()
+    },
     _pad(num, n = 2) {
       let len = num.toString().length
       while (len < n) {
@@ -441,22 +423,14 @@ export default {
       })
     },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN',
-      setPlaying: 'SET_PLAYING',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayMode: 'SET_PLAY_MODE',
-      setPlayList: 'SET_PLAY_LIST'
+      setFullScreen: 'SET_FULL_SCREEN'
     })
   },
   computed: {
     ...mapGetters([
-      'playList',
       'fullScreen',
-      'currentSong',
       'playing',
-      'currentIndex',
-      'mode',
-      'sequenceList'
+      'currentIndex'
     ]),
     playIcon() {
       return this.playing ? 'extend-zanting1' : 'extend-bofang1'
@@ -472,12 +446,6 @@ export default {
     },
     percent() {
       return this.currentTime / this.duration
-    },
-    iconMode() {
-      return this.mode === playMode.loop ? 'extend-danquxunhuan1' : (this.mode === playMode.random ? 'extend-bofangye-caozuolan-suijibofang' : 'extend-xunhuanbofang')
-    },
-    modeTxt() {
-      return this.mode === playMode.loop ? '单曲循环' : (this.mode === playMode.random ? '随机播放' : '顺序播放')
     },
     currentContent() {
       if (!this.playingLyric) {
@@ -528,7 +496,8 @@ export default {
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    PlaylistView
   }
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="play-list">
     <loading v-if="!playlists.length"></loading>
-    <scroll v-else>
+    <scroll v-else :data="playlists">
       <ul>
         <li v-for="item in playlists" :key="item.id" @click="selectItem(item)">
           <div class="img">

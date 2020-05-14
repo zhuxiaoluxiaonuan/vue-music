@@ -6,7 +6,7 @@
         <div class="single-list">
           <div class="title">单曲</div>
           <ul>
-            <li v-for="song in singleList.songs" :key="song.id">
+            <li v-for="song in singleList.songs" :key="song.id" @click="selectSingle(song)">
               <div class="container">
                 <div class="song-name">{{song.name}}</div>
                 <div class="desc">
@@ -26,7 +26,7 @@
         <div class="play-list">
           <div class="title">歌单</div>
           <ul>
-            <li v-for="item in playList.playLists" :key="item.id">
+            <li v-for="item in playList.playLists" :key="item.id" @click="selectPlayList(item)">
               <div class="img">
                 <img v-lazy="item.coverImgUrl" alt="">
               </div>
@@ -79,7 +79,7 @@
         <div class="singer-list">
           <div class="title">歌手</div>
           <ul>
-            <li class="list-group-item" v-for="item in singerList.artists" :key="item.id">
+            <li class="list-group-item" v-for="item in singerList.artists" :key="item.id" @click="selectSinger(item)">
               <img v-lazy="item.picUrl" alt="">
               <div class="desc">
                 <div class="name">
@@ -145,6 +145,15 @@ export default {
         }
       })
       return ret
+    },
+    selectSingle(item) {
+      this.$emit('selectItem', {type: 'single', item})
+    },
+    selectPlayList(item) {
+      this.$emit('selectItem', {type: 'playlist', item})
+    },
+    selectSinger(item) {
+      this.$emit('selectItem', {type: 'singer', item})
     }
   },
   components: {

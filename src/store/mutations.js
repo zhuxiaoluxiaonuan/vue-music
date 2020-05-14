@@ -38,6 +38,9 @@ const mutations = {
   },
   [types.SET_USER] (state, user) {
     state.user = user
+  },
+  [types.SET_SEARCH_HISTORY] (state, searchHistory) {
+    state.searchHistory = searchHistory
   }
 }
 export default mutations

@@ -1,7 +1,7 @@
 <template>
   <div class="singer-list">
     <loading v-if="!artists.length"></loading>
-    <scroll v-else>
+    <scroll v-else :data="artists">
       <ul>
         <li class="list-group-item" v-for="item in artists" :key="item.id" @click="selectItem(item)">
           <img v-lazy="item.picUrl" alt="">

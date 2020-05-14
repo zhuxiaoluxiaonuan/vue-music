@@ -1,7 +1,7 @@
 <template>
   <div class="album-list">
     <loading v-if="!albums.length"></loading>
-    <scroll v-else>
+    <scroll v-else :data="albums">
       <ul>
         <li v-for="item in albums" :key="item.id">
           <div class="img">

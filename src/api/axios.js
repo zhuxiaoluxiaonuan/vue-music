@@ -1,5 +1,5 @@
 import {get} from './common'
-const baseURL = 'http://192.168.0.106:3000'
+const baseURL = 'http://192.168.0.104:3000'
 const extendURL = 'http://120.79.162.149:3000'
 const getRecommendBanner = get(baseURL + '/banner?type=1')
 const getRecommendPersonalized = get(baseURL + '/personalized?limit=9')

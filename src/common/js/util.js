@@ -72,3 +72,21 @@ function download(href, name = 'image') {
   a.click()
   a.remove()
 }
+
+/**
+ * debounce 函数节流，当输入框频繁输入时，需要做函数节流处理 ，提高性能
+ * 原理：利用科里化函数的思想
+ * @param func
+ * @param delay
+ */
+export function debounce(func, delay) {
+  let timer
+  return (...args) => {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  }
+}

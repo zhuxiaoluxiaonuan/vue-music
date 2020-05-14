@@ -4,12 +4,16 @@
       :defaultSearch="defaultSearch"
       ref="searchBox"
       @del="del"
-      @input="input"></search-box>
+      @query="query"></search-box>
     <!--这里使用v-if，而不使用v-show，是为了防止切换页面之后，scroll无法滚动-->
-    <scroll class="search-home" v-if="step===1" ref="scroll">
+    <scroll class="search-home" v-if="step===1" ref="scroll" :data="allData">
       <div class="scroll-content">
-        <div class="history">
-          <div class="title">历史记录</div>
+        <div class="history" v-show="searchHistory.length">
+          <div class="title">
+            历史记录
+            <i class="icon-clear" @click="showConfirm"></i>
+          </div>
+          <search-history :searches="searchHistory" @selectItem="addQuery"></search-history>
         </div>
         <div class="hot-search-list">
           <div class="title">热搜榜</div>
@@ -27,13 +31,20 @@
         </div>
       </div>
     </scroll>
-    <ul class="search-suggest" v-show="searchSuggests.length">
-      <li class="suggest-item" v-for="(item, index) in searchSuggests" :key="index" @click="addQuery(item.keyword)">
-        <i class="icon-search"></i>
-        <span>{{item.keyword}}</span>
-      </li>
-    </ul>
-    <div class="search-result" v-show="step===2">
+    <!--搜索建议页面-->
+    <div class="search-suggest" v-show="step===2" ref="searchSuggest">
+      <ul v-show="searchSuggests.length">
+        <li class="suggest-item" v-for="(item, index) in searchSuggests" :key="index" @click="addQuery(item.keyword)">
+          <i class="icon-search"></i>
+          <span>{{item.keyword}}</span>
+        </li>
+      </ul>
+      <div v-show="isResult" class="no-result-wrapper">
+        <no-result title="抱歉，暂无搜索结果"></no-result>
+      </div>
+    </div>
+    <!--搜索结果界面-->
+    <div class="search-result" v-show="step===3" ref="searchResult">
       <cube-tab-bar
         v-model="selectedLabel"
         show-slider
@@ -48,6 +59,9 @@
         </cube-tab-panel>
       </cube-tab-panels>
     </div>
+    <confirm text="是否确认清空 ?"
+             @confirm="clearSearchHistory"
+             ref="confirm"></confirm>
     <router-view></router-view>
   </div>
 </template>
@@ -61,15 +75,21 @@ import Single from 'components/search/search-result/single'
 import PlayList from 'components/search/search-result/play-list'
 import Singer from 'components/search/search-result/singer'
 import Album from 'components/search/search-result/album'
-import {mapMutations, mapActions} from 'vuex'
+import NoResult from 'base/no-result/no-result'
+import SearchHistory from 'base/search-history/search-history'
+import Confirm from 'base/confirm/confirm'
+import {playListMixin} from 'common/js/mixin'
+import {mapMutations, mapActions, mapGetters} from 'vuex'
 
 export default {
   name: 'search',
+  mixins: [playListMixin],
   data() {
     return {
       defaultSearch: {},
       hotSearchList: [],
       searchSuggests: [],
+      flag: false, // 标志是否发送过搜索建议请求
       selectedLabel: '单曲', // 这里设置的值不能是默认值，否则不会出现下划线
       step: 1,
       categoryList: [
@@ -94,7 +114,9 @@ export default {
           component: Album
         }
       ],
-      keywords: ''
+      keywords: '',
+      bottom: false,
+      sureQuery: false // 是否确认搜索
     }
   },
   created() {
@@ -102,15 +124,25 @@ export default {
     this._getHotSearch()
   },
   methods: {
-    input(keywords) {
+    handlePlayList(playList) {
+      this.bottom = playList.length > 0 ? '45px' : ''
+      if (this.bottom !== '') {
+        this.$refs.searchResult.style.bottom = this.bottom
+      }
+    },
+    query(keywords) {
+      if (this.sureQuery) return
       this.keywords = keywords
       if (keywords === '') {
+        this.step = 1
         this.searchSuggests = []
         return
       }
+      this.step = 2
       this._getSearchSuggest()
     },
     del() {
+      this.sureQuery = false
       this.step = 1
     },
     _getDefaultSearch() {
@@ -133,20 +165,25 @@ export default {
     _getSearchSuggest() {
       getSearchSuggest({
         keywords: this.keywords,
-        limit: 10,
+        limit: 15,
         type: 'mobile'
       }).then(res => {
         if (res.code === 200) {
-          this.searchSuggests = res.result.allMatch
+          if (res.msg) return
+          this.searchSuggests = res.result.allMatch ? res.result.allMatch : []
+          this.flag = true
         }
       })
     },
     addQuery(keywords) {
+      this.sureQuery = true
       this.keywords = keywords
       this.$refs.searchBox.setQuery(keywords)
       this.searchSuggests = []
-      this.step = 2
+      this.step = 3
       this.changePage('综合')
+      // 将搜索记录保存到本地缓存中
+      this.saveSearchHistory(this.keywords)
     },
     getCategoryListIndex(val) {
       return this.categoryList.findIndex(item => item.label === val)
@@ -177,11 +214,46 @@ export default {
         this.insertSong(item)
       }
     },
+    showConfirm() {
+      this.$refs.confirm.show()
+    },
     ...mapMutations({
       setDisc: 'SET_DISC',
       setSinger: 'SET_SINGER'
     }),
-    ...mapActions(['insertSong'])
+    ...mapActions([
+      'insertSong',
+      'saveSearchHistory',
+      'clearSearchHistory'
+    ])
+  },
+  computed: {
+    allData() {
+      return this.hotSearchList.concat(this.searchHistory)
+    },
+    isResult() {
+      return this.flag && this.searchSuggests.length === 0
+    },
+    ...mapGetters([
+      'searchHistory'
+    ])
+  },
+  watch: {
+    step(newVal) {
+      if (this.bottom === '') return
+      switch (newVal) {
+        case 1: {
+          setTimeout(() => {
+            this.$refs.scroll.$el.style.bottom = this.bottom
+            this.$refs.scroll.refresh()
+          }, 20)
+          break
+        }
+        case 2: {
+          this.$refs.searchSuggest.style.bottom = this.bottom
+        }
+      }
+    }
   },
   components: {
     SearchBox,
@@ -189,7 +261,10 @@ export default {
     Comprehensive,
     Single,
     PlayList,
-    Album
+    Album,
+    NoResult,
+    Confirm,
+    SearchHistory
   }
 }
 </script>
@@ -218,6 +293,11 @@ export default {
       i
         margin-right 5px
         font-size $font-size-large-x
+  .no-result-wrapper
+    position: absolute
+    width: 100%
+    top: 50%
+    transform: translateY(-50%)
   .search-home
     position absolute
     top 56px
@@ -226,11 +306,15 @@ export default {
     bottom 0
     height auto
     .title
+      padding-top 10px
       margin-bottom 20px
+      display flex
+      justify-content space-between
       font-size $font-size-medium
       font-weight 800
-    .history
-      padding-top 10px
+      i
+        font-size $font-size-small
+        color $color-text
     .search-item
       margin 20px 0 0 5px
       display flex
