@@ -1,6 +1,9 @@
-import {mapGetters, mapMutations} from 'vuex'
+import {mapGetters, mapMutations, mapActions} from 'vuex'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import {getSearchSuggest, getHotSearch} from 'api/axios'
+import NoResult from 'base/no-result/no-result'
+import SearchBox from 'base/search-box/search-box'
 
 export const playListMixin = {
   computed: {
@@ -73,5 +76,84 @@ export const playerMixin = {
       setPlayMode: 'SET_PLAY_MODE',
       setPlayList: 'SET_PLAY_LIST'
     })
+  }
+}
+export const searchMixin = {
+  data() {
+    return {
+      keywords: '',
+      searchSuggests: [],
+      hotSearchList: [],
+      step: 1,
+      flag: false, // 标志是否发送过搜索建议请求
+      sureQuery: false // 是否确认搜索
+    }
+  },
+  methods: {
+    _getSearchSuggest() {
+      getSearchSuggest({
+        keywords: this.keywords,
+        limit: 15,
+        type: 'mobile'
+      }).then(res => {
+        if (res.code === 200) {
+          if (res.msg) return
+          this.searchSuggests = res.result.allMatch ? res.result.allMatch : []
+          this.flag = true
+        }
+      })
+    },
+    addQuery(keywords, step = 3, pageLabel = '综合') {
+      this.sureQuery = true
+      this.keywords = keywords
+      this.$refs.searchBox.setQuery(keywords)
+      this.searchSuggests = []
+      this.step = step
+      this.changePage(pageLabel)
+      // 将搜索记录保存到本地缓存中
+      this.saveSearchHistory(this.keywords)
+    },
+    _getHotSearch() {
+      getHotSearch().then(res => {
+        if (res.code === 200) {
+          this.hotSearchList = res.data
+        }
+      })
+    },
+    del() {
+      this.sureQuery = false
+      this.step = 1
+    },
+    query(keywords) {
+      this.keywords = keywords
+      if (keywords === '') {
+        this.sureQuery = false
+        this.step = 1
+        this.searchSuggests = []
+        return
+      }
+      if (this.sureQuery) {
+        this.sureQuery = false
+        return
+      }
+      this.step = 2
+      this._getSearchSuggest()
+    },
+    ...mapActions([
+      'insertSong',
+      'saveSearchHistory'
+    ])
+  },
+  computed: {
+    isResult() {
+      return this.flag && this.searchSuggests.length === 0
+    },
+    ...mapGetters([
+      'searchHistory'
+    ])
+  },
+  components: {
+    SearchBox,
+    NoResult
   }
 }

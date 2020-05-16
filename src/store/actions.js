@@ -2,7 +2,7 @@
 import * as types from './mutation-types'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
-import {saveSearch, clearSearch} from 'common/js/cache'
+import {saveSearch, clearSearch, savePlay, clearPlay} from 'common/js/cache'
 
 /**
  * 查找数组某一个个数组项的索引
@@ -15,6 +15,7 @@ function findIndex(list, song) {
     return item.id === song.id
   })
 }
+
 /**
  * 点击播放
  * @param commit
@@ -35,6 +36,7 @@ export const selectPlay = function ({commit, state}, {list, index}) {
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING, true)
 }
+
 /**
  * 随机播放
  * @param commit
@@ -50,6 +52,7 @@ export const randomPlay = function ({commit}, {list}) {
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING, true)
 }
+
 /**
  * 添加歌曲
  * @param commit
@@ -94,6 +97,7 @@ export const insertSong = function({commit, state}, song) {
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING, true)
 }
+
 /**
  * 保存搜索历史到本地缓存中
  * @param commit
@@ -102,6 +106,7 @@ export const insertSong = function({commit, state}, song) {
 export const saveSearchHistory = function({commit}, query) {
   commit(types.SET_SEARCH_HISTORY, saveSearch(query))
 }
+
 /**
  * 清空对应项的本地缓存
  * @param commit
@@ -110,6 +115,7 @@ export const saveSearchHistory = function({commit}, query) {
 export const clearSearchHistory = function({commit}) {
   commit(types.SET_SEARCH_HISTORY, clearSearch())
 }
+
 /**
  * 删除播放列表中的某一首歌曲
  * @param commit
@@ -131,6 +137,7 @@ export const deleteSong = function({commit, state}, song) {
   let playingState = playList.length > 0
   commit(types.SET_PLAYING, playingState)
 }
+
 /**
  * 清空播放列表
  * @param commit
@@ -140,4 +147,22 @@ export const deleteSongList = function({commit}) {
   commit(types.SET_SEQUENCE_LIST, [])
   commit(types.SET_CURRENT_INDEX, -1)
   commit(types.SET_PLAYING, false)
+}
+
+/**
+ * 保存播放历史到本地缓存中
+ * @param commit
+ * @param query
+ */
+export const savePlayHistory = function({commit}, song) {
+  commit(types.SET_PLAY_HISTORY, savePlay(song))
+}
+
+/**
+ * 清空本地缓存的播放历史
+ * @param commit
+ * @param query
+ */
+export const clearPlayHistory = function({commit}) {
+  commit(types.SET_PLAY_HISTORY, clearPlay())
 }

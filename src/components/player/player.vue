@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import {mapGetters, mapMutations} from 'vuex'
+import {mapGetters, mapMutations, mapActions} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
 import {getSongUrl} from 'api/axios'
@@ -259,6 +259,8 @@ export default {
     },
     ready() {
       this.songReady = true
+      // 将当前歌曲保存到vuex的播放历史中
+      this.savePlayHistory(this.currentSong)
     },
     error() {
       this.songReady = true
@@ -424,7 +426,10 @@ export default {
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'
-    })
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   computed: {
     ...mapGetters([

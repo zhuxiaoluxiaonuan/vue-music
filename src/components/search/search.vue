@@ -67,31 +67,25 @@
 </template>
 
 <script>
-import SearchBox from 'base/search-box/search-box'
-import {getDefaultSearch, getSearchSuggest, getHotSearch} from 'api/axios'
+import {getDefaultSearch} from 'api/axios'
 import Scroll from 'base/scroll/scroll'
 import Comprehensive from 'components/search/search-result/comprehensive'
 import Single from 'components/search/search-result/single'
 import PlayList from 'components/search/search-result/play-list'
 import Singer from 'components/search/search-result/singer'
 import Album from 'components/search/search-result/album'
-import NoResult from 'base/no-result/no-result'
 import SearchHistory from 'base/search-history/search-history'
 import Confirm from 'base/confirm/confirm'
-import {playListMixin} from 'common/js/mixin'
-import {mapMutations, mapActions, mapGetters} from 'vuex'
+import {playListMixin, searchMixin} from 'common/js/mixin'
+import {mapMutations, mapActions} from 'vuex'
 
 export default {
   name: 'search',
-  mixins: [playListMixin],
+  mixins: [playListMixin, searchMixin],
   data() {
     return {
       defaultSearch: {},
-      hotSearchList: [],
-      searchSuggests: [],
-      flag: false, // 标志是否发送过搜索建议请求
       selectedLabel: '单曲', // 这里设置的值不能是默认值，否则不会出现下划线
-      step: 1,
       categoryList: [
         {
           label: '综合',
@@ -114,9 +108,7 @@ export default {
           component: Album
         }
       ],
-      keywords: '',
-      bottom: false,
-      sureQuery: false // 是否确认搜索
+      bottom: '' // 当底部的mini播放器显示时，使用bottom进行逻辑处理
     }
   },
   created() {
@@ -130,21 +122,6 @@ export default {
         this.$refs.searchResult.style.bottom = this.bottom
       }
     },
-    query(keywords) {
-      if (this.sureQuery) return
-      this.keywords = keywords
-      if (keywords === '') {
-        this.step = 1
-        this.searchSuggests = []
-        return
-      }
-      this.step = 2
-      this._getSearchSuggest()
-    },
-    del() {
-      this.sureQuery = false
-      this.step = 1
-    },
     _getDefaultSearch() {
       getDefaultSearch().then(res => {
         if (res.code === 200) {
@@ -154,36 +131,6 @@ export default {
           }
         }
       })
-    },
-    _getHotSearch() {
-      getHotSearch().then(res => {
-        if (res.code === 200) {
-          this.hotSearchList = res.data
-        }
-      })
-    },
-    _getSearchSuggest() {
-      getSearchSuggest({
-        keywords: this.keywords,
-        limit: 15,
-        type: 'mobile'
-      }).then(res => {
-        if (res.code === 200) {
-          if (res.msg) return
-          this.searchSuggests = res.result.allMatch ? res.result.allMatch : []
-          this.flag = true
-        }
-      })
-    },
-    addQuery(keywords) {
-      this.sureQuery = true
-      this.keywords = keywords
-      this.$refs.searchBox.setQuery(keywords)
-      this.searchSuggests = []
-      this.step = 3
-      this.changePage('综合')
-      // 将搜索记录保存到本地缓存中
-      this.saveSearchHistory(this.keywords)
     },
     getCategoryListIndex(val) {
       return this.categoryList.findIndex(item => item.label === val)
@@ -222,21 +169,13 @@ export default {
       setSinger: 'SET_SINGER'
     }),
     ...mapActions([
-      'insertSong',
-      'saveSearchHistory',
       'clearSearchHistory'
     ])
   },
   computed: {
     allData() {
       return this.hotSearchList.concat(this.searchHistory)
-    },
-    isResult() {
-      return this.flag && this.searchSuggests.length === 0
-    },
-    ...mapGetters([
-      'searchHistory'
-    ])
+    }
   },
   watch: {
     step(newVal) {
@@ -256,13 +195,11 @@ export default {
     }
   },
   components: {
-    SearchBox,
     Scroll,
     Comprehensive,
     Single,
     PlayList,
     Album,
-    NoResult,
     Confirm,
     SearchHistory
   }

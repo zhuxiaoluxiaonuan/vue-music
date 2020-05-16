@@ -3,7 +3,7 @@
     <loading v-if="!singleList.songs"></loading>
     <scroll v-else class="scroll-box">
       <div class="scroll-wrapper">
-        <div class="single-list">
+        <div class="single-list" v-if="singleList">
           <div class="title">单曲</div>
           <ul>
             <li v-for="song in singleList.songs" :key="song.id" @click="selectSingle(song)">
@@ -23,7 +23,7 @@
             <i class="extend-you-"></i>
           </div>
         </div>
-        <div class="play-list">
+        <div class="play-list" v-if="playList">
           <div class="title">歌单</div>
           <ul>
             <li v-for="item in playList.playLists" :key="item.id" @click="selectPlayList(item)">
@@ -45,13 +45,13 @@
             <i class="extend-you-"></i>
           </div>
         </div>
-        <div class="simi-search">
+        <div class="simi-search" v-if="sim_query">
           <div class="title">相似搜索</div>
           <ul>
             <li v-for="item in sim_query.sim_querys" :key="item.keyword">{{item.keyword}}</li>
           </ul>
         </div>
-        <div class="album-list">
+        <div class="album-list" v-if="albumList">
           <div class="title">专辑</div>
           <ul>
             <li v-for="item in albumList.albums" :key="item.id">
@@ -76,7 +76,7 @@
             <i class="extend-you-"></i>
           </div>
         </div>
-        <div class="singer-list">
+        <div class="singer-list" v-if="singerList">
           <div class="title">歌手</div>
           <ul>
             <li class="list-group-item" v-for="item in singerList.artists" :key="item.id" @click="selectSinger(item)">
