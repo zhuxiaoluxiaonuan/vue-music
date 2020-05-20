@@ -47,6 +47,9 @@
                 <div class="icon share">
                   <i class="extend-fenxiang"></i><span>{{playlist.shareCount | handleNum}}</span>
                 </div>
+                <div class="icon collection" @click="_subscribePlayList">
+                  <i :class="collectionIcon"></i><span>{{subscribedText}}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -67,9 +70,10 @@ import MusicList from 'components/music-list/music-list'
 import Single from 'components/singer-detail/single'
 import SimilarPlayList from 'components/play-list/similar-play-list'
 import {getPlayListDetail} from 'api/axios'
-import {mapGetters} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 import {imgToBlob} from 'common/js/util'
 import {color} from 'common/js/background-color'
+const LIKE_KEY = 'playlist'
 
 export default {
   name: 'play-list',
@@ -106,6 +110,11 @@ export default {
           this.isShow = true
           const tempPlaylist = res.playlist
           this.playlist = {
+            id: tempPlaylist.id, // 歌单ID
+            name: tempPlaylist.name, // 歌单名字
+            coverImgUrl: tempPlaylist.coverImgUrl, // 歌单封面
+            trackCount: tempPlaylist.trackCount, // 歌单歌曲总数
+            creator: tempPlaylist.creator, // 歌单播放次数
             tracks: tempPlaylist.tracks, // 歌单歌曲列表
             description: tempPlaylist.description, // 歌单描述
             commentCount: tempPlaylist.commentCount, // 评论数
@@ -120,6 +129,35 @@ export default {
           }
         }
       })
+    },
+    _subscribePlayList() {
+      if (!this.user.userId) {
+        this.showToastType('请先登录', 'warn', 800)
+        return
+      }
+      this.subscribed ? this.deleteLikeList({
+        type: LIKE_KEY,
+        list: this.playlist,
+        userId: this.user.userId
+      }) : this.saveLikeList({
+        type: LIKE_KEY,
+        list: this.playlist,
+        userId: this.user.userId
+      })
+      this.showToastType(this.subscribed ? '收藏成功' : '已取消收藏', 'correct', 800)
+    },
+    findIndex(list, like) {
+      return list.findIndex((item) => {
+        return item.id === like.id
+      })
+    },
+    showToastType(txt, type, time) {
+      const toast = this.$createToast({
+        time: time,
+        txt: txt,
+        type: type
+      })
+      toast.show()
     },
     goToDetail() {
       // 显示歌单封面详情页面
@@ -136,7 +174,11 @@ export default {
     },
     back() {
       this.$router.back(-1)
-    }
+    },
+    ...mapActions([
+      'saveLikeList',
+      'deleteLikeList'
+    ])
   },
   computed: {
     title() {
@@ -144,6 +186,9 @@ export default {
     },
     picture() {
       return this.disc.picUrl || this.disc.coverImgUrl
+    },
+    collectionIcon() {
+      return this.subscribed ? 'extend-xihuan1 active' : 'extend-icon-test'
     },
     tabs() {
       return [
@@ -164,6 +209,12 @@ export default {
         }
       ]
     },
+    subscribedText() {
+      return this.subscribed ? '已收藏' : '收藏'
+    },
+    subscribed() {
+      return this.user.userId && this.likeList[this.user.userId] && this.likeList[this.user.userId][LIKE_KEY] && this.findIndex(this.likeList[this.user.userId][LIKE_KEY], this.playlist) > -1
+    },
     minTabs() {
       return [
         {
@@ -178,7 +229,11 @@ export default {
         }
       ]
     },
-    ...mapGetters(['disc'])
+    ...mapGetters([
+      'disc',
+      'user',
+      'likeList'
+    ])
   },
   components: {
     MusicList,
@@ -313,9 +368,11 @@ export default {
           color $color-background
           i
             font-size $font-size-large
+            &.active
+              color red
           span
             font-size $font-size-small
-          &.playCount i
+          &.playCount i, &.collection i
             font-weight 800
           &.download i, &.comment i
             font-weight 600

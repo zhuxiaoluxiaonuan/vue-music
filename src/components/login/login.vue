@@ -93,6 +93,7 @@ export default {
   right 0
   bottom 0
   background-color $color-text
+  z-index 200
   .top
     position absolute
     top 80px

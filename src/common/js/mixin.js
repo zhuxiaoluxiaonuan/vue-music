@@ -48,7 +48,7 @@ export const playerMixin = {
     changeMode() {
       const mode = (this.mode + 1) % 3
       this.setPlayMode(mode)
-      this.showToastType()
+      this.showToast()
       let list = this.sequenceList
       if (mode === playMode.random) {
         list = shuffle(list)
@@ -63,7 +63,7 @@ export const playerMixin = {
       })
       this.setCurrentIndex(index)
     },
-    showToastType() {
+    showToast() {
       const toast = this.$createToast({
         txt: this.modeTxt,
         type: 'correct'

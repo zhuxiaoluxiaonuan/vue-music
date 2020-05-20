@@ -19,7 +19,7 @@ export default {
 
 <style scoped lang="stylus">
 @import '~common/stylus/variable.styl'
-@import "~common/stylus/mixin"
+@import "~common/stylus/mixin.styl"
 .no-result
   text-align center
   .no-result-icon

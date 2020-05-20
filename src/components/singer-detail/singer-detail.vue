@@ -26,7 +26,7 @@
                 </div>
                 <div class="desc">Deer音乐人</div>
               </div>
-              <div class="follow" v-show="!props.isScrollTop">＋&nbsp;关注</div>
+              <div class="follow" v-show="!props.isScrollTop" @click="follow" v-html="followText"></div>
             </div>
           </div>
         </template>
@@ -41,13 +41,14 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 import Single from 'components/singer-detail/single'
 import Album from 'components/singer-detail/album'
 import About from 'components/singer-detail/about'
 import Tab from 'base/tab/tab'
 import MusicList from 'components/music-list/music-list'
 
+const LIKE_KEY = 'singer'
 export default {
   name: 'singer-detail',
   created() {
@@ -74,9 +75,42 @@ export default {
     back() {
       this.$router.back()
     },
+    follow() {
+      if (!this.user.userId) {
+        this.showToastType('请先登录', 'warn', 800)
+        return
+      }
+      this.followed ? this.deleteLikeList({
+        type: LIKE_KEY,
+        list: this.singer,
+        userId: this.user.userId
+      }) : this.saveLikeList({
+        type: LIKE_KEY,
+        list: this.singer,
+        userId: this.user.userId
+      })
+      this.showToastType(this.followed ? '关注成功' : '已取消关注', 'correct', 800)
+    },
+    showToastType(txt, type, time) {
+      const toast = this.$createToast({
+        time: time,
+        txt: txt,
+        type: type
+      })
+      toast.show()
+    },
     setMinHeight(minHeight) {
       this.minHeight = minHeight
-    }
+    },
+    findIndex(list, like) {
+      return list.findIndex((item) => {
+        return item.id === like.id
+      })
+    },
+    ...mapActions([
+      'saveLikeList',
+      'deleteLikeList'
+    ])
   },
   computed: {
     bgStyle() {
@@ -131,8 +165,16 @@ export default {
         }
       ]
     },
+    followText() {
+      return this.followed ? '&#10003&nbsp;已关注' : '＋&nbsp;关注'
+    },
+    followed() {
+      return this.user.userId && this.likeList[this.user.userId] && this.likeList[this.user.userId][LIKE_KEY] && this.findIndex(this.likeList[this.user.userId][LIKE_KEY], this.singer) > -1
+    },
     ...mapGetters([ // 使用对象展开运算符将 getter 混入 computed 对象中
-      'singer'
+      'singer',
+      'user',
+      'likeList'
     ])
   },
   components: {

@@ -1,6 +1,6 @@
 import { loadTab } from 'common/js/storage'
 import {playMode} from 'common/js/config'
-import {loadSearch, loadPlay} from 'common/js/cache'
+import {loadSearch, loadPlay, loadLike, loadUser} from 'common/js/cache'
 
 const KEY = 'index'
 const state = {
@@ -15,7 +15,8 @@ const state = {
   currentIndex: -1,
   disc: {},
   topList: [],
-  user: {},
+  user: loadUser(),
+  likeList: loadLike(loadUser().userId),
   searchHistory: loadSearch(),
   playHistory: loadPlay()
 }

@@ -2,7 +2,7 @@
 import * as types from './mutation-types'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
-import {saveSearch, clearSearch, savePlay, clearPlay} from 'common/js/cache'
+import {saveSearch, clearSearch, savePlay, clearPlay, saveLike, deleteLike} from 'common/js/cache'
 
 /**
  * 查找数组某一个个数组项的索引
@@ -165,4 +165,26 @@ export const savePlayHistory = function({commit}, song) {
  */
 export const clearPlayHistory = function({commit}) {
   commit(types.SET_PLAY_HISTORY, clearPlay())
+}
+
+/**
+ * 保存喜欢的数据
+ * @param commit
+ * @param song
+ * @param userId
+ */
+export const saveLikeList = function({commit}, {type, list, userId}) {
+  let tempObj = saveLike(type, list, userId)
+  commit(types.SET_LIKE_LIST, tempObj)
+}
+
+/**
+ * 删除喜欢的数据
+ * @param commit
+ * @param song
+ * @param userId
+ */
+export const deleteLikeList = function({commit}, {type, list, userId}) {
+  let tempObj = deleteLike(type, list, userId)
+  commit(types.SET_LIKE_LIST, tempObj)
 }

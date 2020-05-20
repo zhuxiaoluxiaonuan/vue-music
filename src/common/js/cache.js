@@ -4,6 +4,8 @@ const SEARCH_KEY = '_search_'
 const SEARCH_MAX_LENGTH = 15 // 搜索历史数组中最多能存储的数据总数
 const PLAY_KEY = '_play_'
 const PLAY_MAX_LENGTH = 200 // 播放历史数组中最多能存储的数据总数
+const LIKE_KEY = '_like_'
+const USER_KEY = '_user_'
 
 /**
  * 向搜索历史数组中插入某一项
@@ -85,4 +87,65 @@ export function loadPlay() {
 export function clearPlay() {
   storage.remove(PLAY_KEY)
   return []
+}
+
+/**
+ * 将喜欢的列表保存到本地存储中
+ * @param type
+ * @param list
+ * @param userId
+ * @returns {*}
+ */
+export function saveLike(type, list, userId) {
+  let likeObj = storage.get(LIKE_KEY, {})
+  if (typeof likeObj[userId] === 'undefined') {
+    likeObj[userId] = {
+      [type]: [list]
+    }
+  } else if (typeof likeObj[userId][type] === 'undefined') {
+    likeObj[userId][type] = [list]
+  } else {
+    likeObj[userId][type].push(list)
+  }
+  storage.set(LIKE_KEY, likeObj)
+  return likeObj
+}
+
+export function deleteLike(type, list, userId) {
+  let likeObj = storage.get(LIKE_KEY, {})
+  let index = findIndex(likeObj[userId][type], list)
+  likeObj[userId][type].splice(index, 1)
+  storage.set(LIKE_KEY, likeObj)
+  return likeObj
+}
+
+/**
+ * 获取本地存储中的喜欢数据
+ * @returns {*}
+ */
+export function loadLike() {
+  return storage.get(LIKE_KEY, {})
+}
+
+export function saveUser(user) {
+  storage.set(USER_KEY, user)
+}
+export function loadUser() {
+  return storage.get(USER_KEY, {})
+}
+
+export function deleteUser() {
+  storage.set(USER_KEY, {})
+}
+
+/**
+ * 查找数组某一个个数组项的索引
+ * @param list
+ * @param like
+ * @returns {*}
+ */
+function findIndex(list, like) {
+  return list.findIndex((item) => {
+    return item.id === like.id
+  })
 }

@@ -31,8 +31,8 @@
                 <div class="singer-name">{{currentSong.singer}}</div>
                 <div class="songN-singerN">{{currentContent}}</div>
               </div>
-              <div class="right">
-                <i class="extend-icon-test"></i>
+              <div class="right" @click="setLike">
+                <i :class="likeClass"></i>
               </div>
             </div>
           </div>
@@ -124,7 +124,7 @@
 import {mapGetters, mapMutations, mapActions} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
-import {getSongUrl} from 'api/axios'
+import {getSongUrl, likeSong} from 'api/axios'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import {playMode} from 'common/js/config'
@@ -137,6 +137,7 @@ import {playerMixin} from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
+const LIKE_KEY = 'song'
 export default {
   name: 'player',
   mixins: [playerMixin],
@@ -392,6 +393,35 @@ export default {
     showPlayListView() {
       this.$refs.playlistView.show()
     },
+    showToastType(txt, type, time) {
+      const toast = this.$createToast({
+        time: time,
+        txt: txt,
+        type: type
+      })
+      toast.show()
+    },
+    setLike() {
+      if (!this.user.userId) {
+        this.showToastType('请先登录', 'warn', 800)
+        return
+      }
+      likeSong({
+        like: !this.liked,
+        id: this.currentSong.id
+      }).then(res => {
+        this.liked ? this.deleteLikeList({
+          type: LIKE_KEY,
+          list: this.currentSong,
+          userId: this.user.userId
+        }) : this.saveLikeList({
+          type: LIKE_KEY,
+          list: this.currentSong,
+          userId: this.user.userId
+        })
+        this.showToastType(this.liked ? '喜欢成功' : '取消喜欢成功', 'correct', 800)
+      })
+    },
     _pad(num, n = 2) {
       let len = num.toString().length
       while (len < n) {
@@ -424,19 +454,21 @@ export default {
         }
       })
     },
+    findIndex(list, like) {
+      return list.findIndex((item) => {
+        return item.id === like.id
+      })
+    },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN'
     }),
     ...mapActions([
-      'savePlayHistory'
+      'savePlayHistory',
+      'saveLikeList',
+      'deleteLikeList'
     ])
   },
   computed: {
-    ...mapGetters([
-      'fullScreen',
-      'playing',
-      'currentIndex'
-    ]),
     playIcon() {
       return this.playing ? 'extend-zanting1' : 'extend-bofang1'
     },
@@ -452,12 +484,25 @@ export default {
     percent() {
       return this.currentTime / this.duration
     },
+    liked() {
+      return this.user.userId && this.likeList[this.user.userId] && this.likeList[this.user.userId][LIKE_KEY] && this.findIndex(this.likeList[this.user.userId][LIKE_KEY], this.currentSong) > -1
+    },
+    likeClass() {
+      return this.liked ? 'extend-xihuan1 liked' : 'extend-icon-test'
+    },
     currentContent() {
       if (!this.playingLyric) {
         return `${this.currentSong.name} - ${this.currentSong.singer}`
       }
       return this.playingLyric
-    }
+    },
+    ...mapGetters([
+      'fullScreen',
+      'playing',
+      'currentIndex',
+      'user',
+      'likeList'
+    ])
   },
   watch: {
     currentSong(newSong, oldSong) {
@@ -602,6 +647,8 @@ export default {
               i
                 font-size $font-size-large-xx
                 color $color-background
+                &.liked
+                  color red
         .bottom
           position absolute
           bottom 0

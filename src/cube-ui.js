@@ -10,6 +10,7 @@ import {
   TabBar,
   TabPanels,
   Slide,
+  Scroll,
   Button,
   Toast,
   Checkbox
@@ -18,6 +19,7 @@ import {
 Vue.use(TabBar)
 Vue.use(TabPanels)
 Vue.use(Slide)
+Vue.use(Scroll)
 Vue.use(Button)
 Vue.use(Toast)
 Vue.use(Checkbox)

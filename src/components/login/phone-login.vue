@@ -63,6 +63,8 @@
 <script>
 import {getCheckPhone, loginCellPhone, sentCaptcha, verifyCaptcha} from 'api/axios'
 import {mapMutations} from 'vuex'
+import {saveUser} from 'common/js/cache'
+
 export default {
   name: 'phone-login',
   data() {
@@ -97,7 +99,7 @@ export default {
     next() {
       if (!this.checkNum()) {
         this.showToastType('请输入正确的手机号', 'warn', 800)
-        this.del()
+        this.phoneDel()
       } else {
         this.showToastType('正在验证账户信息', 'loading', 100)
         // 验证手机号是否已注册
@@ -164,9 +166,11 @@ export default {
       }).then(res => {
         if (res.code === 200) {
           this.hide()
-          let tempObj = res.account
+          this.showToastType('登录成功', 'correct', 800)
+          let tempObj = res.profile
           tempObj['isShow'] = false
           this.setUser(tempObj)
+          saveUser(tempObj)
         } else {
           this.passwordDel()
           this.showToastType('密码错误', 'warn', 800)
@@ -194,10 +198,12 @@ export default {
       verifyCaptcha({
         phone: this.phoneNumber,
         captcha: this.captcha
-      }).then(res => {}).catch(() => {
-        this.showToastType('验证码错误', 'warn', 800)
-        this.captcha = null
-        this.captchaArr = ['', '', '', '']
+      }).then(res => {
+        if (!res) {
+          this.showToastType(`${this.$errorMessage}，请重新输入`, 'warn', 800)
+          this.captcha = null
+          this.captchaArr = ['', '', '', '']
+        }
       })
     },
     ...mapMutations({
@@ -238,6 +244,7 @@ export default {
   right 0
   bottom 0
   background-color $color-background
+  z-index 220
   .input
     display flex
     justify-content space-between
