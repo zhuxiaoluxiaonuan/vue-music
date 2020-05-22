@@ -46,6 +46,10 @@ export default {
       default() {
         return []
       }
+    },
+    topList: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -77,6 +81,7 @@ export default {
       return this.disc.name
     },
     picture() {
+      if (this.topList) return this.disc.tracks[0].al.picUrl
       return this.disc.picUrl || this.disc.coverImgUrl // 重点注意：当从推荐页进入此页面时，取的是picUrl的值，反之，当点击了相似歌单，再次进入此页面时，取的是coverImgUrl中的值
     },
     ...mapGetters(['disc'])

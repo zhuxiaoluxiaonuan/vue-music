@@ -111,6 +111,7 @@ export default {
       this._getSearchResult()
     },
     playAll(songList) {
+      this.showToastType()
       this.randomPlay({
         list: songList
       })

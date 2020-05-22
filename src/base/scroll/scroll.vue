@@ -52,7 +52,8 @@ export default {
         scrollX: this.scrollX,
         scrollY: this.scrollY,
         probeType: this.probeType,
-        click: this.click
+        click: this.click,
+        stopPropagation: true
       })
       if (this.listenScroll) { // listenScroll 是否监听滚动
         const _this = this

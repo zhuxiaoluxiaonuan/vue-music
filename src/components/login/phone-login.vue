@@ -190,6 +190,7 @@ export default {
       }).then(res => {
         if (res.code === 200) {
           // 开启倒计时
+          this.time = 60
           this.countDown()
         }
       })

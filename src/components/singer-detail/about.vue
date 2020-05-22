@@ -40,7 +40,7 @@
           </ul>
         </div>
       </div>
-      <div class="similar-singer" v-show="similarSinger.length">
+      <div class="similar-singer" v-show="similarSinger.length" @click.stop>
         <div class="title">
           <i class="icon-play"></i>
           <span>相似歌手</span>
@@ -49,11 +49,13 @@
             <i class="extend-you-"></i>
           </div>
         </div>
-        <Scroll :data="similarSinger">
-          <div class="similar-singer-list">
-            <div class="similar-singer-item">
-              <img src="" alt="" class="">
-              <span class="name"></span>
+        <Scroll :data="similarSinger" :scrollX="true" :scrollY="false">
+          <div class="similar-singer-list" ref="similarSingerList">
+            <div class="similar-singer-item" v-for="singer in similarSinger" :key="singer.id">
+              <div class="similar-singer-content">
+                <img :src="singer.picUrl" alt="" class="">
+                <span class="name">{{singer.name}}</span>
+              </div>
             </div>
           </div>
         </Scroll>
@@ -95,7 +97,8 @@ export default {
           id: this.singer.id
         }).then(similarSinger => {
           if (similarSinger && similarSinger.code === 200) {
-            this.similarSinger = similarSinger
+            this.similarSinger = similarSinger.artists
+            this._setWidth()
           }
         })
       })
@@ -112,6 +115,9 @@ export default {
         }
       })
       this.singerInformationComp.show()
+    },
+    _setWidth() {
+      this.$refs.similarSingerList.style.width = this.similarSinger.length * 90 + 'px'
     },
     ...mapMutations({
       'setTabIndex': 'SET_TABINDEX'
@@ -132,7 +138,7 @@ export default {
 <style scoped lang="stylus">
 @import '~common/stylus/variable.styl'
 .about-list
-  padding 20px 14px
+  padding 0 14px 20px 14px
   background-color $color-background-l
   .basic-data,.recent-hot-topics,.similar-singer
     margin 20px 0
@@ -207,4 +213,22 @@ export default {
             margin-right 4px
           .album
             margin-left 4px
+  .similar-singer-list
+    white-space nowrap
+    .similar-singer-item
+      display inline-block
+      width 90px
+      border-radius 50%
+      .similar-singer-content
+        display flex
+        flex-direction column
+        justify-content center
+        align-items center
+        img
+          margin-bottom 10px
+          width 60px
+          height 60px
+          border-radius 50%
+        span
+          font-size $font-size-small
 </style>

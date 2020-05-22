@@ -57,7 +57,7 @@
              <div class="swiper-item" @click="showMyLike(1)">
                <div class="mask">
                  <div class="inner">
-                   <i class="extend-yigou-copy"></i>
+                   <i class="extend-guanzhu"></i>
                    <span>我关注的歌手</span>
                  </div>
                </div>
@@ -314,7 +314,7 @@ export default {
               left 0
               right 0
               bottom 0
-              background rgba(0, 0, 0, 0.6)
+              background $color-text-d
               border-radius 8px
               .inner
                 position absolute
@@ -330,7 +330,7 @@ export default {
                 align-items center
                 i
                   font-size 32px
-                  color #ff0c32
+                  color #e84b20
                 span
                   color $color-background
                   font-size $font-size-small
@@ -343,7 +343,7 @@ export default {
             &:nth-child(3)
               background-image url("cover03.jpg")
               .mask .inner i
-                font-size $font-size-large-x
+                font-size 28px
 
             @keyframes bgAnimation
               0%

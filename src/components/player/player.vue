@@ -111,7 +111,7 @@
         </progress-circle>
       </div>
       <div class="list">
-        <i class="extend extend-bofangliebiao1"></i>
+        <i class="extend extend-bofangliebiao1" @click.stop="showPlayListView"></i>
       </div>
     </div>
     </transition>

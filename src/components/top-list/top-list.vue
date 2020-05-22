@@ -69,6 +69,9 @@ export default {
   name: 'top-list',
   created() {
     this.flag = !this.topList.updateFrequency
+    if (this.topList.rankType === 0 || this.topList.rankType === 1 || this.topList.rankType === 2 || this.topList.rankType === 3 || this.topList.rankType === 25) {
+      this.topListFlag = true // 标志当前点击的是哪种排行榜
+    }
     this.init()
   },
   data() {
@@ -78,7 +81,8 @@ export default {
       singleHeight: 0,
       isShow: false,
       coverUrlBlur: color.black,
-      rank: true
+      rank: true,
+      topListFlag: false
     }
   },
   mounted() {
@@ -116,7 +120,8 @@ export default {
       this.playListCoverComp = this.playListCoverComp || this.$createPlayListCover({
         $props: {
           brief: this.topList.description,
-          tags: this.topList.tags
+          tags: this.topList.tags,
+          topList: this.topListFlag
         }
       })
       this.playListCoverComp.show()
@@ -144,6 +149,9 @@ export default {
       return this.topList.name
     },
     picture() {
+      if (this.topListFlag) {
+        return this.topList.tracks[0].al.picUrl
+      }
       return this.topList.coverImgUrl
     },
     songList() {
